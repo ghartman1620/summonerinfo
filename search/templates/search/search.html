@@ -1,0 +1,35 @@
+{% load static %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href={% static 'search.css' %} type = "text/css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<p> search for another summoner:</p>
+<form action="{% url 'search:searchtarget'%}" method="post">
+    {% csrf_token %}
+    <input type="text" placeholder="Search for a summoner" name="summonerName"/>
+    <input type="submit" value="Search"/>
+</form>
+
+
+{% if name %} <div class="text"><p>{{name}}</p></div>
+{% else %} <p>no name</p>
+{% endif %}
+
+{% if overview %}
+<p>{{overview}}</p>
+{% endif %}
+<p> times in PST</p>
+{% if winratesByTime %}
+{% for wr in winratesByTime %}
+<p>{{wr}}</p>
+{% endfor %}
+{% endif %}
+
+
+{% if otherSummonersWr %}
+<p> Players with whom you've played more than two games (Games you won, games played)</p>
+{% for wr in otherSummonersWr %}
+<p> {{wr}}</p>
+{% endfor %}
+{% endif %}
