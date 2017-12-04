@@ -12,4 +12,4 @@ class TestWinrateByTimeOfDay(TestCase):
         self.assertEqual(wr.endTime, 6, 'endTime field of wr incorrect')
         self.assertEqual(wr.won, 5, 'gamesWon field of wr incorrect')
         self.assertEqual(wr.played, 10, 'gamesPlayed field of wr incorrect')
-        self.assertEqual(wr.__str__(), '50.0% winrate from 0:00 to 6:00 over 10 games.')
+        self.assertEqual(wr.__str__(), '50.00% winrate from 0:00 to 6:00 over 10 games.')

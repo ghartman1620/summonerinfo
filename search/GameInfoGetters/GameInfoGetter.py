@@ -15,5 +15,3 @@ class GameInfoGetter(abc.ABC):
     @abc.abstractclassmethod
     def getMatchById(self, id):
         return NotImplemented
-
-

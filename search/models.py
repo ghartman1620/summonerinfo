@@ -6,10 +6,13 @@ class Match(models.Model):
     jsonString = models.TextField()
     
 
+
 ''''I started trying to translate the riot games match data into
 a database with appropriately named fields.
 An easier approach is to just store the json string in the db as above.
 Maybe I'll either complete this or delete it in the future. Who knows?
+it would be much nicer to the db if i did it this way...
+the timelines DEFINITELY have to be like this though
 class MatchDto(models.Model):
     seasonId = models.IntegerField()
     queueId = models.IntegerField()

@@ -85,20 +85,20 @@ class MatchList():
     '''
     returns a pair of lists, the first describing the winrates of this summoner
     that appear on this summoner's team more than once and the second describing
-    the winrates of this summoner against any summoner that appears on the enemy team more than twice.
+    the winrates of this summoner against any summoner that appears on the enemy team more than once.
     '''
     def winrateByOtherSummoners(self):
         allyTeamWrDict = dict()
         enemyTeamWrDict = dict()
         for match in self.matches:
-            
             match.extendWrBySummonerDicts(allyTeamWrDict, enemyTeamWrDict)
+
         winrates = []
         for v in allyTeamWrDict.values():
-            if v.played > 2:
+            if v.played > 1:
                 winrates.append(v)
         for v in enemyTeamWrDict.values():
-            if v.played > 2:
+            if v.played > 1:
                 winrates.append(v)
             
         return winrates

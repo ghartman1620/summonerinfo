@@ -89,6 +89,7 @@ class MatchListTest (TestCase):
         eternalIn = False
         makotoIn = False
         montaroIn= False
+        
         for wr in winrates:
             if wr.thatSummoner == 'l am eternal':
                 eternalIn = True
@@ -109,7 +110,7 @@ class MatchListTest (TestCase):
                 self.assertEqual(wr.played, 2, 'bad itou makoto winrate values')
                 self.assertEqual(wr.won, 1, 'bad itou makoto winrate values')
         self.assertTrue(eternalIn, 'l am eternal not in winrates')
-        self.assertTrue(makotoIn, 'ito makoto not in winrates')
+        self.assertTrue(makotoIn, 'itou makoto not in winrates')
         self.assertTrue(montaroIn, 'lilmontaro not in winrates')
         self.assertEqual(len(winrates), 3)
         

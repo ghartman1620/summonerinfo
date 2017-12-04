@@ -7,8 +7,10 @@ from json import loads
 from search.GameInfoGetters.GameInfoGetter import GameInfoGetter
 from time import sleep
 
+API_KEY = ''
+with open('api-key', 'r') as f:
+    API_KEY = f.read()
 
-API_KEY = 'RGAPI-1c447349-877a-449e-bff4-6d4bd5d71d5d'
 def jsonFromUrl(url):
     
     callSuccess = False
