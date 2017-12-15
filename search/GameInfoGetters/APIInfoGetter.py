@@ -53,4 +53,6 @@ class APIInfoGetter(GameInfoGetter):
         jsonObj = jsonFromUrl('https://na1.api.riotgames.com/lol/match/v3/matches/' + str(id) + '?api_key=' + API_KEY)
         return jsonObj
         
-        
+    def getMatchTimelineById(self, id):
+        return jsonFromUrl('https://na1.api.riotgames.com/lol/match/v3/timelines/by-match/'+ str(id) + '?api_key='+str(API_KEY))
+    

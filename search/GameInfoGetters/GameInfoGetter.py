@@ -15,3 +15,7 @@ class GameInfoGetter(abc.ABC):
     @abc.abstractclassmethod
     def getMatchById(self, id):
         return NotImplemented
+
+    @abc.abstractclassmethod
+    def getMatchTimelineById(self,id):
+        return NotImplemented

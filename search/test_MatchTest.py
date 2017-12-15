@@ -4,16 +4,26 @@ Created on Nov 27, 2017
 @author: ghart
 '''
 from search.GameInfoGetters.GameInfoFactory import getInfoGetter
+from search.GameConstants import Team,Dragon
 from search.Match.Match import Match
 from django.test import TestCase
 class MatchTest(TestCase):
     def setUp(self):
         gameinfo = getInfoGetter(True)
         ml = gameinfo.getMatchlistBySummonerId(50164289, 0)
-        self.match = Match(gameinfo.getMatchById(ml['matches'][0]['gameId']), 'l am eternal', ml['matches'][0]['timestamp']) #loss, mockGame0
-        self.match1 = Match(gameinfo.getMatchById(ml['matches'][2]['gameId']), 'l am eternal', ml['matches'][2]['timestamp']) #win, mockGame 2
-        self.match2 = Match(gameinfo.getMatchById(ml['matches'][6]['gameId']), 'l am eternal', ml['matches'][6]['timestamp']) #win, mockGame6
-        self.match3 = Match(gameinfo.getMatchById(ml['matches'][7]['gameId']), 'l am eternal', ml['matches'][7]['timestamp']) #loss, mockGame7
+        
+        self.match = Match(gameinfo.getMatchById(ml['matches'][0]['gameId']), 'l am eternal', 
+                            ml['matches'][0]['timestamp'],
+                            gameinfo.getMatchTimelineById(ml['matches'][0]['gameId'])) #loss, mockGame0
+        self.match1 = Match(gameinfo.getMatchById(ml['matches'][2]['gameId']), 'l am eternal', 
+                            ml['matches'][2]['timestamp'],
+                            gameinfo.getMatchTimelineById(ml['matches'][2]['gameId'])) #win, mockGame 2
+        self.match2 = Match(gameinfo.getMatchById(ml['matches'][6]['gameId']), 'l am eternal',
+                            ml['matches'][6]['timestamp'],
+                            gameinfo.getMatchTimelineById(ml['matches'][6]['gameId'])) #win, mockGame6
+        self.match3 = Match(gameinfo.getMatchById(ml['matches'][7]['gameId']), 'l am eternal', 
+                            ml['matches'][7]['timestamp'],
+                            gameinfo.getMatchTimelineById(ml['matches'][7]['gameId'])) #loss, mockGame7
         
     
     def testIsWin(self):
@@ -48,7 +58,19 @@ class MatchTest(TestCase):
             self.assertEqual(k, v.thatSummoner)
         for k,v in enemyWrDict.items():
             self.assertEqual(k, v.thatSummoner)
-            
+    def testNumDragons(self):
+        dragons = self.match.dragons()
+        #print(str(dragons))
+        self.assertEqual(dragons, \
+                         [(False, Dragon.AIR, 580304), 
+                          (True, Dragon.AIR, 1039151), 
+                          (False, Dragon.EARTH, 1439257)])
+        dragons1 = self.match1.dragons()
+        #print(str(dragons1))
+        self.assertEqual(dragons1, \
+                         [(True, Dragon.EARTH, 482252), 
+                          (True, Dragon.AIR, 1011005), 
+                          (True, Dragon.WATER, 1409648)])
         
         
         

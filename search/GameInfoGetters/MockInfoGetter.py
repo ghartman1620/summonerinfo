@@ -7,8 +7,8 @@ from search.GameInfoGetters.GameInfoGetter import GameInfoGetter
 from search.MockGenerator import generateMockInfo
 from json import loads, dumps
 
-
 def verifyOpen(filename):
+    
     try: 
         return open(filename, 'r')
     except FileNotFoundError:
@@ -31,12 +31,24 @@ class MockInfoGetter(GameInfoGetter):
             raise RuntimeError(' no mock matchlist data for account id ' + str(id))
         f = verifyOpen('search/mockMatchlist')
         obj = loads(f.read())
-        return obj
         
-    def getMatchById(self, id):
+        if endIndex != None:
+            if endIndex > 41:
+                raise RuntimeError('bad endIndex for MockInfoGetter.getMatchlistBySummonerId')
+            obj['matches'] = obj['matches'][0:endIndex]
+        return obj
+    def checkMatchInfo(self):
         if len(self.matches) == 0:
             for i in range(0, 41):
                 f = verifyOpen('search/mockGames/mockGame' + str(i))
                 match = loads(f.read())
-                self.matches[match['gameId']] = match
-        return self.matches[id]
+                f2 = verifyOpen('search/mockGames/mockTimeline' + str(i))
+                matchtl = loads(f2.read())
+                self.matches[match['gameId']] = (match, matchtl)
+    def getMatchById(self, id):
+        self.checkMatchInfo()
+        return self.matches[id][0]
+
+    def getMatchTimelineById(self, id):
+        self.checkMatchInfo()
+        return self.matches[id][1]

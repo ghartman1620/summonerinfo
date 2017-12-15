@@ -29,3 +29,6 @@ class DBAPIInfoGetter(GameInfoGetter):
             print('Adding match ' + str(id) + 'to DB')
             
         return match
+    #TODO: make timelines saved in database.
+    def getMatchTimelineById(self,id):
+        return self.gameinfo.getMatchTimelineById(id)

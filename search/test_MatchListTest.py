@@ -4,12 +4,18 @@ Created on Nov 24, 2017
 @author: ghart
 '''
 
+#12/5 TODO: get the mock matches back from the most recent commit
+#and use their match ids to get timelines, not the match ids from matchlist
+#cause otherwise it'll fuck up all the other tests
+
 from search.GameInfoGetters.GameInfoFactory import getInfoGetter
 from search.GameConstants import QueueType, SeasonId
 from search.Match.MatchList import MatchList
 from search.Match.Match import Match
 from search.WinrateTypes.WinrateByTimeOfDay import WinrateByTimeOfDay
+from search.GameConstants import Dragon
 from django.test import TestCase
+import math
 
 class MatchListCtorTest (TestCase):
     gameinfo = None
@@ -32,6 +38,8 @@ class MatchListCtorTest (TestCase):
             self.assertIn('gameId', match.matchDto.keys(), msg)
             self.assertIn('teams', match.matchDto.keys(), msg)
             self.assertIn('participants', match.matchDto.keys(), msg)
+            self.assertIn('frames', match.timeline.keys(), msg)
+            self.assertIn('frameInterval', match.timeline.keys(), msg)
         self.assertTrue(len(self.matchlist.matches) > 0, 'no matches in this matchlist')
         
     
@@ -113,4 +121,59 @@ class MatchListTest (TestCase):
         self.assertTrue(makotoIn, 'itou makoto not in winrates')
         self.assertTrue(montaroIn, 'lilmontaro not in winrates')
         self.assertEqual(len(winrates), 3)
+       
+    #TODO: write this test. use python shell in root of project directory to generate these stats.
+    '''
+    def testDragonInfo(self):
+        dragonStats = self.matchlist.dragonStats()
+        self.assertEqual(dragonStats.percentOfTotalDragonKillsByDragon, {
+                (Dragon.FIRE : 27.52),
+                (Dragon.EARTH: 29.36),
+                (Dragon.AIR  : 20.18),
+                (Dragon.WATER: 20.18),
+                (Dragon.ELDER:  2.75)})'''
+class SmallMatchListTest(TestCase):
+    def setUp(self):
+        self.matchlist = MatchList(getInfoGetter(True), 'l am eternal', 5)
+    def testMatchlistOnlyHas5Matches(self):
+        self.assertEqual(5, len(self.matchlist.matches))
+    #class DragonStats repeated here for ease of test writing
+    '''
+    class DragonStats():
+        totalPercentOfElementalKilled = 0
+        totalPercentOfElderKilled = 0
+        percentTotals = dict()
+        percentOfEachDragonSecured = dict()
+        percentOfDragonsByOrder = dict()
+        percentOfElderDragonsByOrder = dict()
+        ktFirstElderDragon = ()
+        ktElderDragons = ()
+        avgTimeAliveByDragonsYourKills = dict()
+        avgTimeAliveByDragonsEnemyKills = dict()
+        percentFirstElderDragon = 0
+        avgTimeFirstDragon = 0
+        avgTimeLostFirstDragon =0
+    '''
+'''
+    def testDragonStatsOnListWithNoElders(self):
+        ds = self.matchlist.dragonStats()
+        self.assertEqual(ds.percentOfAllElementalDragonsKilledByThisSummoner, 7/(8+7)*100)
+        self.assertTrue(math.isnan(ds.percentOfAllElderDragonsKilledByThisSummoner))
+        self.assertEqual(ds.percentOfTotalDragonsKilledByThisSummonerOfEachType, { 
+            (Dragon.AIR  : 200/7),
+            (Dragon.FIRE : 100/7),
+            (Dragon.EARTH: 300/7),
+            (Dragon.WATER: 100/7),
+            (Dragon.ELDER: 0    ) 
+            })
+        self.assertEqual(ds.percentOfDragonsOfEachTypeKilledByThisSummoner, {
+            (Dragon.AIR  : 200/5        ),
+            (Dragon.FIRE : 200/4        ),
+            (Dragon.EARTH: 300/5        ),
+            (Dragon.WATER: 100/1        ),
+            (Dragon.ELDER: float('NaN') ),
+            })
+        self.assertEqual(ds.percentOfDragonsKilledByThisSummonerByOrder, [40.0, 75.0, 25.0, 0.0, 100.0])
+        '''
         
+    

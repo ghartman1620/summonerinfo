@@ -24,3 +24,25 @@ class SeasonId(Enum):
     SEASON_2016 = 7
     PRESEASON_2017 = 8
     SEASON_2017 = 9
+    
+class Team(Enum):
+    BLUE = 100
+    RED = 200
+class Dragon(Enum):
+    FIRE = 1
+    WATER = 2
+    EARTH = 3
+    AIR = 4
+    ELDER = 5
+    @staticmethod
+    def fromStr(dragon):
+        if dragon == "AIR_DRAGON":
+            return Dragon.AIR
+        if dragon == "WATER_DRAGON":
+            return Dragon.WATER
+        if dragon == "FIRE_DRAGON":
+            return Dragon.FIRE
+        if dragon == "EARTH_DRAGON":
+            return Dragon.EARTH
+        if dragon == "ELDER_DRAGON":
+            return Dragon.ELDER
