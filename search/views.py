@@ -6,9 +6,8 @@ from search.WinrateTypes.Winrate import Winrate
 from search.Match.MatchList import MatchList
 from search.GameConstants import QueueType
 
-API_KEY = 'RGAPI-3aeac268-24fc-4fc6-a77a-9032c60c1f77'
 
-
+''''
 def win(name, match):
     winningTeam = 0 if match['teams'][0]['win'] == 'Win' else 1
     for i in range(0,5):
@@ -21,7 +20,7 @@ def win(name, match):
     if winningTeam == 1: #and second team won
         return True
     return False #else player is on second team and first team won
-    
+'''
 def wrListToStringList(winrates):
     stringList = []
     for wr in winrates:

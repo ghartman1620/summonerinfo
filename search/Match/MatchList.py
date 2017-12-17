@@ -28,9 +28,9 @@ Other methods perform diagnostics on those matches.
 class MatchList():
     matches = []
     summoner = ''
-    
     season = 0
     queue = 0
+    
     def __str__(self):
         return str(len(self.matches)) + ' matches analyzed. ' +(('queue: ' + str(self.queue)) if self.queue != None else '') + \
             (('season: ' + str(self.season)) if self.season != None else '')

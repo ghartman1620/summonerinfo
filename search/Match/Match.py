@@ -14,6 +14,7 @@ class Match():
     timestamp = 0
     timeline = dict()
     summoner = ''
+    
     def __init__(self, matchInfo, summonerName, time, tl):
         self.matchDto = matchInfo
         assert 'queueId' in self.matchDto.keys(), 'Match created with a dict passed thats not a MatchDto'
