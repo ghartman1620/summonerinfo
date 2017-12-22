@@ -21,7 +21,7 @@ def jsonFromUrl(url):
             callSuccess = True
         except HTTPError as e:
             if( e.code == 429):
-                print("too many api calls. Trying again in 10 seconds.")
+                print("429: too many api calls. Trying again in 10 seconds.")
                 sleep(10)
             else:
                 raise(e)

@@ -137,43 +137,68 @@ class SmallMatchListTest(TestCase):
         self.matchlist = MatchList(getInfoGetter(True), 'l am eternal', 5)
     def testMatchlistOnlyHas5Matches(self):
         self.assertEqual(5, len(self.matchlist.matches))
-    #class DragonStats repeated here for ease of test writing
+
+    def testPctAllElemental(self):
+        self.assertEqual(self.matchlist.pctAllElemental(), 7/(8+7)*100)
+    def testPctAllElder(self):
+        self.assertTrue(math.isnan(self.matchlist.pctAllElders()))
+    def testPctDragonsKilledByType(self):
+        self.assertEqual(self.matchlist.pctDragonsKilledByType(), { 
+            Dragon.AIR  : 200/7,
+            Dragon.FIRE : 100/7,
+            Dragon.EARTH: 300/7,
+            Dragon.WATER: 100/7,
+            Dragon.ELDER: 0     
+            })
+    def testPctEachDragonType(self):
+        pctDragonsOfEachTypeKIlled = self.matchlist.pctEachDragonType()
+        dTypes = {
+            Dragon.AIR  : 200/5        ,
+            Dragon.FIRE : 100/4        ,
+            Dragon.EARTH: 300/5        ,
+            Dragon.WATER: 100          ,
+            Dragon.ELDER: float('NaN') ,
+        }
+        for k,v in pctDragonsOfEachTypeKIlled.items():
+            if k == Dragon.ELDER:
+                self.assertTrue(math.isnan(v))
+            else:
+                self.assertEqual(dTypes[k], v)
+    def testPctElementatKilledByOrder(self):
+        self.assertEqual(self.matchlist.pctElementalKilledByOrder(), [40.0, 75.0, 25.0, 0.0, 100.0])
+    def testPctElderKilledByOrderIsEmpty(self):
+        self.assertEqual(self.matchlist.pctElderKilledByOrder(), [])
     '''
-    class DragonStats():
-        totalPercentOfElementalKilled = 0
-        totalPercentOfElderKilled = 0
-        percentTotals = dict()
-        percentOfEachDragonSecured = dict()
-        percentOfDragonsByOrder = dict()
-        percentOfElderDragonsByOrder = dict()
-        ktFirstElderDragon = ()
-        ktElderDragons = ()
-        avgTimeAliveByDragonsYourKills = dict()
-        avgTimeAliveByDragonsEnemyKills = dict()
-        percentFirstElderDragon = 0
-        avgTimeFirstDragon = 0
-        avgTimeLostFirstDragon =0
-    '''
-'''
+    this is a test of a bad function in matchlist - dragonStats()
+    see the comments of that function to know why this is commented out.
     def testDragonStatsOnListWithNoElders(self):
         ds = self.matchlist.dragonStats()
+        self.maxDiff = None
         self.assertEqual(ds.percentOfAllElementalDragonsKilledByThisSummoner, 7/(8+7)*100)
         self.assertTrue(math.isnan(ds.percentOfAllElderDragonsKilledByThisSummoner))
-        self.assertEqual(ds.percentOfTotalDragonsKilledByThisSummonerOfEachType, { 
-            (Dragon.AIR  : 200/7),
-            (Dragon.FIRE : 100/7),
-            (Dragon.EARTH: 300/7),
-            (Dragon.WATER: 100/7),
-            (Dragon.ELDER: 0    ) 
-            })
-        self.assertEqual(ds.percentOfDragonsOfEachTypeKilledByThisSummoner, {
-            (Dragon.AIR  : 200/5        ),
-            (Dragon.FIRE : 200/4        ),
-            (Dragon.EARTH: 300/5        ),
-            (Dragon.WATER: 100/1        ),
-            (Dragon.ELDER: float('NaN') ),
-            })
-        self.assertEqual(ds.percentOfDragonsKilledByThisSummonerByOrder, [40.0, 75.0, 25.0, 0.0, 100.0])
-        '''
+
         
+        self.assertDictEqual(ds.percentOfTotalDragonsKilledByThisSummonerOfEachType, { 
+            Dragon.AIR  : 200/7,
+            Dragon.FIRE : 100/7,
+            Dragon.EARTH: 300/7,
+            Dragon.WATER: 100/7,
+            Dragon.ELDER: 0     
+            })
+        dTypes = {
+            Dragon.AIR  : 200/5        ,
+            Dragon.FIRE : 100/4        ,
+            Dragon.EARTH: 300/5        ,
+            Dragon.WATER: 100          ,
+            Dragon.ELDER: float('NaN') ,
+        }
+        for k,v in ds.percentOfDragonsOfEachTypeKilledByThisSummoner.items():
+            if k == Dragon.ELDER:
+                self.assertTrue(math.isnan(v))
+            else:
+                self.assertEqual(dTypes[k], v)
+        
+
+        self.assertEqual(ds.percentOfDragonsKilledByThisSummonerByOrder, [40.0, 75.0, 25.0, 0.0, 100.0])
+    '''
     

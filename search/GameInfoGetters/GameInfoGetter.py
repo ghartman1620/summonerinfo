@@ -2,7 +2,7 @@ import abc
 
 
 #Abstract class to contain a list of riot games api calling methods.
-#Known implementing classes: APILeagueGetter, MockLeagueGetter
+#Known implementing classes: APIInfoGetter, MockInfoGetter, DBAPIInfoGetter
 class GameInfoGetter(abc.ABC):
 
     @abc.abstractclassmethod

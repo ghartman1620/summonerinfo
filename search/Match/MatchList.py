@@ -1,7 +1,6 @@
 from search.Match.Match import Match
 from search.WinrateTypes.WinrateByTimeOfDay import WinrateByTimeOfDay
 from search.WinrateTypes.WinrateByOtherSummoner import WinrateByOtherSummoner
-from search.util import DragonStats
 from search.GameConstants import Dragon
 
 from datetime import datetime
@@ -30,6 +29,7 @@ class MatchList():
     summoner = ''
     season = 0
     queue = 0
+    dragonKillList = []
     
     def __str__(self):
         return str(len(self.matches)) + ' matches analyzed. ' +(('queue: ' + str(self.queue)) if self.queue != None else '') + \
@@ -56,6 +56,9 @@ class MatchList():
             self.matches.extend(getMatchesFromMatchlist(gameinfo.getMatchlistBySummonerId(id, (math.floor(maxMatches/100))*100, maxMatches), gameinfo, season, queue, summonerName))
         self.season = season
         self.queue = queue
+        self.dragonKillList = []
+        for match in self.matches:
+            self.dragonKillList.append(match.dragons())
         
     def filter(self, predicate):
         newMatches = []
@@ -76,96 +79,346 @@ class MatchList():
     what time you get the first dragon on average
     what time the enemy gets the first dragon from you on average
     '''
+   
+    #pctAllElemental
+    
+    def pctAllElemental(self):
+        ''''      
+        @rtype: number
+        @return: the percentage of all elemental dragons this summoner kills in the listed matches. 
+        '''
+        totalTeamElementalKills = 0
+        totalEnemyElementalKills = 0
+        for dkL in self.dragonKillList:
+            for dk in dkL:
+                if dk.type != Dragon.ELDER:
+                    if dk.thisSummonerKilled: #if this summoner killed this dragon
+                            totalTeamElementalKills+=1
+                    else:
+                        totalEnemyElementalKills+=1
+        
+        
+        if totalTeamElementalKills + totalEnemyElementalKills== 0:
+            return float('NaN')
+        else:
+            return 100*totalTeamElementalKills/(totalTeamElementalKills+totalEnemyElementalKills)
+    #pctAllElders
+    def pctAllElders(self):
+        '''    
+        @rtype: number
+        @return: the percentage of all elemental dragons this summoner kills in the listed matches. 
+        '''
+        totalTeamElderKills = 0
+        totalEnemyElderKills = 0
+        for dkL in self.dragonKillList:
+            for dk in dkL:
+                if dk.thisSummonerKilled: #if this summoner killed this dragon
+                    if dk.type == Dragon.ELDER:
+                        totalTeamElderKills+=1
+                else:
+                    if dk.type == Dragon.ELDER:
+                        totalEnemyElderKills+=1
+
+        if totalTeamElderKills + totalEnemyElderKills== 0:
+            return float('NaN')
+        else:
+            return 100*totalTeamElderKills/(totalTeamElderKills+totalEnemyElderKills)
+        
+    #Returns the percentage of all elemental dragons this summoner kills in the listed matches.
+    #pctDragonsKilledByType
+    def pctDragonsKilledByType(self):
+        '''
+        Returns a dictionary that maps up to the five types of dragons to the number of times
+        that each was killed as a fraction of the total number of dragon kills by this summoner
+        in the listed games.
+        
+        If no dragons were killed in the listed games, each value in the dictionary will be nan.
+        
+        @rtype: a dictionary {Dragon : number}
+        @return: a mapping of dragon types to their percentage of deaths to this summoner
+        '''
+        teamDragonKillsByType = dict()
+        totalKills = 0
+        for dkL in self.dragonKillList:
+            for dk in dkL:
+                if dk.thisSummonerKilled: #if this summoner killed this dragon
+                    if not dk.type in teamDragonKillsByType.keys():
+                        teamDragonKillsByType[dk.type] = 0
+                    teamDragonKillsByType[dk.type]+=1
+                    totalKills+=1
+        dragons = dict()
+        if totalKills == 0:
+            for d in Dragon.types():
+                dragons[d] = float('nan')
+        for d in Dragon.types():
+            if not d in teamDragonKillsByType.keys():
+                dragons[d] = 0
+            else:
+                dragons[d] = 100*teamDragonKillsByType[d]/(totalKills)
+        return dragons
+    #pctEachDragonType
+    def pctEachDragonType(self):
+        '''
+        Returns a dictionary mapping each dragon type to the percentage of the
+        total times that dragon has died to the total times this summoner has killed
+        that dragon in the listed games.
+        
+        If no dragons of a particular type have been killed in the listed games,
+        that dragon's key in the dictionary will map to the value nan.
+        
+        @rtype: a dictionary {Dragon : number}
+        @return: mapping of each dragon type to the percentage of the time that summoner kills it
+        '''
+        teamDragonKillsByType = dict()
+        enemyDragonKillsByType = dict()
+        for dkL in self.dragonKillList:
+            for dk in dkL:
+                if dk.thisSummonerKilled: #if this summoner killed this dragon
+                    if not dk.type in teamDragonKillsByType.keys():
+                        teamDragonKillsByType[dk.type] = 0
+                    teamDragonKillsByType[dk.type]+=1
+                else:
+                    if not dk.type in enemyDragonKillsByType.keys():
+                        enemyDragonKillsByType[dk.type] = 0
+                    enemyDragonKillsByType[dk.type]+=1
+        dragons = dict()
+        for d in Dragon.types():
+            if d in enemyDragonKillsByType.keys() and d in teamDragonKillsByType.keys():
+                dragons[d] = 100*(teamDragonKillsByType[d]/ (teamDragonKillsByType[d] + enemyDragonKillsByType[d]))
+            elif d in enemyDragonKillsByType.keys():
+                dragons[d] = 0
+            elif d in teamDragonKillsByType.keys():
+                dragons[d] = 100
+            else:
+                dragons[d] = float('NaN')
+        return dragons
+    #pctElementalKilledByOrder
+    def pctElementalKilledByOrder(self):
+        '''
+        Returns a list of the percentage of the nth dragons in the listed games
+        that this summoner kills.
+        
+        @rtype: list of numbers
+        @return: list of the percent of the time that this summoner kills the nth elemental drake
+        '''
+        
+        killsOfDragonsByOrder = []
+        lostDragonsByOrder = []
+        for dkL in self.dragonKillList:
+            i = 0
+            for dk in dkL:
+                if dk.type != Dragon.ELDER:
+                    if dk.thisSummonerKilled:
+                        while len(killsOfDragonsByOrder) < i+1:
+                            killsOfDragonsByOrder.append(0)
+                        killsOfDragonsByOrder[i]+=1
+                    else:
+                        while len(lostDragonsByOrder) < i+1:
+                            lostDragonsByOrder.append(0)
+                        lostDragonsByOrder[i]+=1
+
+                i +=1
+        i = 0
+        dragons = []
+
+        #set ds.percentOfDragonsByOrder
+        for k,l in zip(killsOfDragonsByOrder, lostDragonsByOrder):
+            if k!=0 or l != 0:
+                dragons.append(100*k/(k+l))
+            i+=1
+        #if killsOfDragonsByOrder or lostDragonsByOrder do not ahve the same length
+        #those kills should still count (for example if the summoner has never killed the 5th elemental drake in a game,
+        #they should know they kill 0% of 5th drakes
+        if len(killsOfDragonsByOrder) > len(lostDragonsByOrder):
+            while len(dragons) < len(killsOfDragonsByOrder):
+                dragons.append(100.00)
+        elif len(killsOfDragonsByOrder) < len(lostDragonsByOrder):
+            while len(dragons) < len(lostDragonsByOrder):
+                dragons.append(0)
+        return dragons
+    #pctElderKilledByOrder
+    def pctElderKilledByOrder(self):
+        '''
+        Returns a list of the percentage of the nth elder dragons in the listed games
+        that this summoner kills.
+        
+        @rtype: list of numbers
+        @return: list of the percent of the time that this summoner kills the nth elder drake
+        '''
+        killsOfDragonsByOrder = []
+        lostDragonsByOrder = []
+        for dkL in self.dragonKillList:
+            i = 0
+            for dk in dkL:
+                if dk.type == Dragon.ELDER:
+                    if dk.thisSummonerKilled:
+                        while len(killsOfDragonsByOrder) < i+1:
+                            killsOfDragonsByOrder.append(0)
+                        killsOfDragonsByOrder[i]+=1
+                    else:
+                        while len(lostDragonsByOrder) < i+1:
+                            lostDragonsByOrder.append(0)
+                        lostDragonsByOrder[i]+=1
+
+                    i +=1
+        i = 0
+        dragons = []
+
+        #set ds.percentOfDragonsByOrder
+        for k,l in zip(killsOfDragonsByOrder, lostDragonsByOrder):
+            if k!=0 or l != 0:
+                dragons.append(100*k/(k+l))
+            i+=1
+        #if killsOfDragonsByOrder or lostDragonsByOrder do not ahve the same length
+        #those kills should still count (for example if the summoner has never killed the 5th elemental drake in a game,
+        #they should know they kill 0% of 5th drakes
+        if len(killsOfDragonsByOrder) > len(lostDragonsByOrder):
+            while len(dragons) < len(killsOfDragonsByOrder):
+                dragons.append(100.00)
+        elif len(killsOfDragonsByOrder) < len(lostDragonsByOrder):
+            while len(dragons) < len(lostDragonsByOrder):
+                dragons.append(0)
+        return dragons
+    '''
+    THIS code is bad. it is here as a reminder of how not to write code.
+    The functionality of this function is implemented by the several functions above that deal with 
+    dragon stats. They do this in multiple, single-responsibility functions like they're supposed to.
+    This function is just nonsense.
+    Don't use it.
+    Tyler told me to leave it here.
     def dragonStats(self):
+        
+        #Initialize the dragon stats object and the dragon kill list 
+        #dragonKillList is a list of the dragon kill lists of each game.
         ds = DragonStats()
         dragonKillList = []
         for match in self.matches:
             dragonKillList.append(match.dragons())
-        
+
         #% of total dragons pie chart is ds.percentTotals
         teamDragonKillsByType = dict()
         enemyDragonKillsByType = dict()
-        totalEnemyKills = 0
-        totalTeamKills = 0
+        totalEnemyElementalKills = 0
+        totalEnemyElderKills = 0
+        totalTeamElementalKills = 0
+        totalTeamElderKills = 0
         for dkL in dragonKillList:
             for dk in dkL:
-                if dk[0]: #if this summoner killed this dragon
-                    totalTeamKills+=1
-                    if not dk[1] in teamDragonKillsByType.keys():
-                        teamDragonKillsByType[dk[1]] = 0
-                    teamDragonKillsByType[dk[1]]+=1
+                if dk.thisSummonerKilled: #if this summoner killed this dragon
+                    if dk.type != Dragon.ELDER:
+                        totalTeamElementalKills+=1
+                    else:
+                        totalTeamElderKills+=1
+                    if not dk.type in teamDragonKillsByType.keys():
+                        teamDragonKillsByType[dk.type] = 0
+                    teamDragonKillsByType[dk.type]+=1
                 else:
-                    totalEnemyKills+=1
-                    if not dk[1] in enemyDragonKillsByType.keys():
-                        enemyDragonKillsByType[dk[1]] = 0
-                    enemyDragonKillsByType[dk[1]]+=1
-        print(str(dragonKillList)) 
-        ds.percentTotals = dict()
-        for d in teamDragonKillsByType.keys():
-            ds.percentTotals[d] = teamDragonKillsByType[d]/totalTeamKills
+                    if dk.type != Dragon.ELDER:
+                        totalEnemyElementalKills+=1
+                    else:
+                        totalEnemyElderKills+=1
+                    if not dk.type in enemyDragonKillsByType.keys():
+                        enemyDragonKillsByType[dk.type] = 0
+                    enemyDragonKillsByType[dk.type]+=1
+        
+        #Getting the total percent of all drakes that die in this summoners' games that this summoner kills.
+        #Elemental and elder.
+        if totalTeamElementalKills + totalEnemyElementalKills== 0:
+            ds.percentOfAllElementalDragonsKilledByThisSummoner = float('NaN')
+        else:
+            ds.percentOfAllElementalDragonsKilledByThisSummoner = 100*totalTeamElementalKills/(totalTeamElementalKills+totalEnemyElementalKills)
+        if totalTeamElderKills + totalEnemyElderKills == 0:
+            ds.percentOfAllElderDragonsKilledByThisSummoner = float('NaN')
+        else:
+            ds.percentOfAllElderDragonsKilledByThisSummoner = 100*totalTeamElderKills/(totalEnemyElderKills+totalTeamElderKills)
+        #Getting the percent of total dragons killed by this summoner by type
+        ds.percentOfTotalDragonsKilledByThisSummonerOfEachType = dict()
+        for d in Dragon.types():
+            if not d in teamDragonKillsByType.keys():
+                ds.percentOfTotalDragonsKilledByThisSummonerOfEachType[d] = 0
+            else:
+                ds.percentOfTotalDragonsKilledByThisSummonerOfEachType[d] = 100*teamDragonKillsByType[d]/(totalTeamElementalKills+totalTeamElderKills)
             
-        #% of each type of dragon your team kills is ds.percentOfEachDragon
-        #chart
-        ds.percentOfEachDragon = dict()
-        #print(str(teamDragonKillsByType))
-        #print(str(enemyDragonKillsByType))
-        for d in teamDragonKillsByType.keys():
-            if d in enemyDragonKillsByType.keys():
-                ds.percentOfEachDragonSecured[d] = (teamDragonKillsByType[d]/ (teamDragonKillsByType[d] + enemyDragonKillsByType[d]))
-            
-        #% of elemental dragons by chronological order is ds.percentOfDragonsByOrder
-        killsOfDragonsByOrder = [0 for x in range(10)]
-        lostDragonsByOrder = [0 for x in range(10)]
-        ds.percentOfDragonsByOrder = [0 for x in range(10)]
-        ds.percentOfElderDragonsByOrder = [0 for x in range(10)]
-        killsOfElderDragonsByOrder = [0 for x in range(10)]
-        lostElderDragonsByOrder = [0 for x in range(10)]
+        #Getting the percent of dragons of each type killed by this summoner
+        ds.percentOfDragonsOfEachTypeKilledByThisSummoner = dict()
+        for d in Dragon.types():
+            if d in enemyDragonKillsByType.keys() and d in teamDragonKillsByType.keys():
+                ds.percentOfDragonsOfEachTypeKilledByThisSummoner[d] = 100*(teamDragonKillsByType[d]/ (teamDragonKillsByType[d] + enemyDragonKillsByType[d]))
+            elif d in enemyDragonKillsByType.keys():
+                ds.percentOfDragonsOfEachTypeKilledByThisSummoner[d] = 0
+            elif d in teamDragonKillsByType.keys():
+                ds.percentOfDragonsOfEachTypeKilledByThisSummoner[d] = 100
+            else:
+                ds.percentOfDragonsOfEachTypeKilledByThisSummoner[d] = float('NaN')
+        #Getting how much of each dragon by order (first dragon, second dragon, etc) this summoner kills
+        killsOfDragonsByOrder = []
+        lostDragonsByOrder = []
+        killsOfElderDragonsByOrder = []
+        lostElderDragonsByOrder = []
         for dkL in dragonKillList:
             i = 0
             elemental = True
             for dk in dkL:
-                if dk[1] == Dragon.ELDER: 
+                if dk.type == Dragon.ELDER: 
                     i=0
                     elemental = False
                 if elemental:
-                    if dk[0]:
+                    if dk.thisSummonerKilled:
+                        while len(killsOfDragonsByOrder) < i+1:
+                            killsOfDragonsByOrder.append(0)
                         killsOfDragonsByOrder[i]+=1
                     else:
+                        while len(lostDragonsByOrder) < i+1:
+                            lostDragonsByOrder.append(0)
                         lostDragonsByOrder[i]+=1
                 else:
-                    if dk[0]:
+                    if dk.thisSummonerKilled:
+                        while len(killsOfElderDragonsByOrder) < i+1:
+                            killsOfElderDragonsByOrder.append(0)
                         killsOfElderDragonsByOrder[i]+=1
                     else:
+                        while len(lostElderDragonsByOrder) < i+1:
+                            lostElderDragonsByOrder.append(0)
                         lostElderDragonsByOrder[i] +=1
                     
                 i +=1
         i = 0
-        #print(str(killsOfDragonsByOrder))
-        #print(str(lostDragonsByOrder))
+        ds.percentOfDragonsKilledByThisSummonerByOrder = []
+        ds.percentOfElderDragonsKilledByThisSummonerByOrderByOrder = []
+
+        #set ds.percentOfDragonsByOrder
         for k,l in zip(killsOfDragonsByOrder, lostDragonsByOrder):
             if k!=0 or l != 0:
-                ds.percentOfDragonsByOrder[i] = 100*k/(k+l)
+                ds.percentOfDragonsKilledByThisSummonerByOrder.append(100*k/(k+l))
             i+=1
+        #if killsOfDragonsByOrder or lostDragonsByOrder do not ahve the same length
+        #those kills should still count (for example if the summoner has never killed the 5th elemental drake in a game,
+        #they should know they kill 0% of 5th drakes
         if len(killsOfDragonsByOrder) > len(lostDragonsByOrder):
-            ds.percentOfDragonsByOrder[len(killsOfDragonsByOrder)] = 100.00
+            while len(ds.percentOfDragonsKilledByThisSummonerByOrder) < len(killsOfDragonsByOrder):
+                ds.percentOfDragonsKilledByThisSummonerByOrder.append(100.00)
         elif len(killsOfDragonsByOrder) < len(lostDragonsByOrder):
-            ds.percentOfDragonsByOrder[len(killsOfDragonsByOrder)] = 0.00
+            while len(ds.percentOfDragonsKilledByThisSummonerByOrder) < len(lostDragonsByOrder):
+                ds.percentOfDragonsKilledByThisSummonerByOrder.append(0)
+    
+        #set ds.percentOfElderDragonsByOrder
+        #set it for dragon order for which there's both a kill and a loss
         for k,l in zip(killsOfElderDragonsByOrder, lostElderDragonsByOrder):
             if k!= 0 or l != 0:
-                ds.percentOfElderDragonsByOrder[i] = 100*k/(k+l)
+                ds.percentOfElderDragonsByOrder.append(100*k/(k+l))
             i+=1
+        #if killsOfDragonsByOrder or lostDragonsByOrder do not ahve the same length
+        #those kills should still count (for example if the summoner has never killed the 5th elder drake in a game,
+        #they should know they kill 0% of 5th drakes
         if len(killsOfElderDragonsByOrder) > len(lostElderDragonsByOrder):
-            ds.percentOfElderDragonsByOrder[len(killsOfElderDragonsByOrder)] = 100.00
+            while len(ds.percentOfElderDragonsKilledByThisSummonerByOrder) < len(killsOfElderDragonsByOrder):
+                ds.percentOfElderDragonsKilledByThisSummonerByOrder.append(100.00)
         elif len(killsOfElderDragonsByOrder) < len(lostElderDragonsByOrder):
-            ds.percentOfElderDragonsByOrder[len(killsOfElderDragonsByOrder)] = 0.00   
-        ds.totalPercent = 100*totalTeamKills/totalEnemyKills
-        #print(str(ds.totalPercent))
-        #print(str(ds.percentTotals))
-        #print(str(ds.percentOfEachDragonSecured))
-        #print(str(ds.percentOfDragonsByOrder))
-        #print(str(ds.percentOfElderDragonsByOrder))
+            while len(ds.percentOfElderDragonsKilledByThisSummonerByOrder) < len(lostElderDragonsByOrder):
+                ds.percentOfElderDragonsKilledByThisSummonerByOrder.append(0)
+
         return ds
-        
+        '''
     '''
     Returns a list of 4 WinrateByTimeofDay objects describing the winrates of this summoner within the matches of this MatchList:
     0-6

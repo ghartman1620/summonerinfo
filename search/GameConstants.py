@@ -46,3 +46,8 @@ class Dragon(Enum):
             return Dragon.EARTH
         if dragon == "ELDER_DRAGON":
             return Dragon.ELDER
+    @staticmethod
+    def types():
+        return [Dragon.FIRE, Dragon.WATER, Dragon.EARTH, Dragon.AIR, Dragon.ELDER]
+    def __lt__(self, other):
+        return self.value < other.value

@@ -6,6 +6,7 @@ Created on Nov 25, 2017
 
 from search.WinrateTypes.WinrateByOtherSummoner import WinrateByOtherSummoner
 from search.GameConstants import Team, Dragon
+from search.util import DragonKill
 
 BLUE_TEAM = 100
 RED_TEAM = 200
@@ -31,6 +32,8 @@ class Match():
                 return BLUE_TEAM
             
         return RED_TEAM
+    
+    
     
     '''
     Returns an array of tuples reprenting the dragon kills in this game in chronological order.
@@ -60,7 +63,7 @@ class Match():
                 if event['type'] == 'ELITE_MONSTER_KILL':
                     if event['monsterType'] == 'DRAGON':
                         #print(str(event))
-                        dragons.append( (True if team == BLUE_TEAM and event['killerId'] <= 5
+                        dragons.append( DragonKill(True if team == BLUE_TEAM and event['killerId'] <= 5
                                               or team == RED_TEAM  and event['killerId'] > 5 else False    
                             ,Dragon.fromStr(event['monsterSubType'])
                             ,event['timestamp']))

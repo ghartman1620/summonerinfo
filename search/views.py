@@ -178,14 +178,32 @@ def search(request, name):
         'vsPlayersTeam'  : vsPlayersTeamList,
     })
     '''
-    gameinfo = getInfoGetter()
-    matchList = MatchList(gameinfo, name, queue=QueueType.RANKED_SOLODUO)
+    matchList = MatchList(getInfoGetter(), name, maxMatches=30, queue=QueueType.RANKED_SOLODUO)
     #remember that you wrote the text 'in PST only' into search.html
+    for dkL in matchList.dragonKillList:
+        for dk in dkL:
+            print(str(dk), end='')
+        print()
+    for match in matchList.matches:
+        time = datetime.fromtimestamp(match.timestamp/1000)
+        print(str(time))
     return render(request, 'search/search.html', {
-        'name'            : name                                                    ,
-        'overview'        : str(matchList)                                          ,
-        'winratesByTime'  : wrListToStringList(matchList.winrateByTime())           ,
-        'otherSummonersWr': wrListToStringList(matchList.winrateByOtherSummoners()) ,
+        'name'            : name                                                              ,
+        'overview'        : str(matchList)                                                    ,
+        #By time
+        'winratesByTime'  : wrListToStringList(matchList.winrateByTime())                     ,
+        
+        #OtherSummoners:
+        'otherSummonersWr': wrListToStringList(matchList.winrateByOtherSummoners())           ,
+        
+        #Dragons:
+        #(dicts turned into lists for easier html display)
+        'pctElementals'   : matchList.pctAllElemental()                                       ,
+        'pctElders'       : matchList.pctAllElders()                                          ,
+        'pctOfEachType'   : matchList.pctDragonsKilledByType().items()                        ,
+        'pctOfTotalByType': matchList.pctEachDragonType().items()                             ,
+        'pctEleByOrder'   : matchList.pctElementalKilledByOrder()                             ,
+        'pctElderByOrder' : matchList.pctElderKilledByOrder()
     })
     
 def searchtarget(request):

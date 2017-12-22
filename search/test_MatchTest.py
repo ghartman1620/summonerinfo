@@ -6,6 +6,7 @@ Created on Nov 27, 2017
 from search.GameInfoGetters.GameInfoFactory import getInfoGetter
 from search.GameConstants import Team,Dragon
 from search.Match.Match import Match
+from search.util import DragonKill
 from django.test import TestCase
 class MatchTest(TestCase):
     def setUp(self):
@@ -59,18 +60,20 @@ class MatchTest(TestCase):
         for k,v in enemyWrDict.items():
             self.assertEqual(k, v.thatSummoner)
     def testNumDragons(self):
+        self.maxDiff = None
         dragons = self.match.dragons()
         #print(str(dragons))
+
         self.assertEqual(dragons, \
-                         [(False, Dragon.AIR, 580304), 
-                          (True, Dragon.AIR, 1039151), 
-                          (False, Dragon.EARTH, 1439257)])
+                         [DragonKill(False, Dragon.AIR, 580304), 
+                          DragonKill(True, Dragon.AIR, 1039151), 
+                          DragonKill(False, Dragon.EARTH, 1439257)])
         dragons1 = self.match1.dragons()
         #print(str(dragons1))
         self.assertEqual(dragons1, \
-                         [(True, Dragon.EARTH, 482252), 
-                          (True, Dragon.AIR, 1011005), 
-                          (True, Dragon.WATER, 1409648)])
+                         [DragonKill(True, Dragon.EARTH, 482252), 
+                          DragonKill(True, Dragon.AIR, 1011005), 
+                          DragonKill(True, Dragon.WATER, 1409648)])
         
         
         
