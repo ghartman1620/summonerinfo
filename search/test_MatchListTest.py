@@ -135,6 +135,8 @@ class MatchListTest (TestCase):
 class SmallMatchListTest(TestCase):
     def setUp(self):
         self.matchlist = MatchList(getInfoGetter(True), 'l am eternal', 5)
+    def testAvgBarons(self):
+        self.assertEqual(.4, self.matchlist.avgBarons())
     def testMatchlistOnlyHas5Matches(self):
         self.assertEqual(5, len(self.matchlist.matches))
 
@@ -168,6 +170,8 @@ class SmallMatchListTest(TestCase):
         self.assertEqual(self.matchlist.pctElementalKilledByOrder(), [40.0, 75.0, 25.0, 0.0, 100.0])
     def testPctElderKilledByOrderIsEmpty(self):
         self.assertEqual(self.matchlist.pctElderKilledByOrder(), [])
+    #def testTimeFirstDragon(self):
+        #self.assertEqual(493, self.matchlist.avgFirstDragonTime())
     '''
     this is a test of a bad function in matchlist - dragonStats()
     see the comments of that function to know why this is commented out.

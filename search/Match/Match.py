@@ -34,7 +34,20 @@ class Match():
         return RED_TEAM
     
     
-    
+    def barons(self):
+        '''
+        Returns the number of barons your team has killed this game.
+        
+        @rtype: a number
+        @return: number of barons
+        '''
+        #1. Find which team this summoner is on
+        if self.thisSummonersTeamId() == BLUE_TEAM:
+            return self.matchDto['teams'][0]['baronKills']
+        else:
+            return self.matchDto['teams'][1]['baronKills']
+        
+        
     '''
     Returns an array of tuples reprenting the dragon kills in this game in chronological order.
     (TEAM, DRAGON) where TEAM is a value of GameConstants.Team and DRAGON is

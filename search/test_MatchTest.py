@@ -26,7 +26,8 @@ class MatchTest(TestCase):
                             ml['matches'][7]['timestamp'],
                             gameinfo.getMatchTimelineById(ml['matches'][7]['gameId'])) #loss, mockGame7
         
-    
+    def testBarons(self):
+        self.assertEqual(0, self.match.barons(), 'wrong number of barons for mock game 0')
     def testIsWin(self):
         self.assertFalse(self.match.isWin(), 'incorrect match win results produced for mockGame0')
         self.assertTrue(self.match1.isWin(), 'incorrect match win results produced for mockGame2')

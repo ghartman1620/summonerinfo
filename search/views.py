@@ -180,13 +180,7 @@ def search(request, name):
     '''
     matchList = MatchList(getInfoGetter(), name, maxMatches=30, queue=QueueType.RANKED_SOLODUO)
     #remember that you wrote the text 'in PST only' into search.html
-    for dkL in matchList.dragonKillList:
-        for dk in dkL:
-            print(str(dk), end='')
-        print()
-    for match in matchList.matches:
-        time = datetime.fromtimestamp(match.timestamp/1000)
-        print(str(time))
+
     return render(request, 'search/search.html', {
         'name'            : name                                                              ,
         'overview'        : str(matchList)                                                    ,
@@ -203,7 +197,10 @@ def search(request, name):
         'pctOfEachType'   : matchList.pctDragonsKilledByType().items()                        ,
         'pctOfTotalByType': matchList.pctEachDragonType().items()                             ,
         'pctEleByOrder'   : matchList.pctElementalKilledByOrder()                             ,
-        'pctElderByOrder' : matchList.pctElderKilledByOrder()
+        'pctElderByOrder' : matchList.pctElderKilledByOrder()                                 ,
+        
+        #Barons:
+        'avgBarons'       : matchList.avgBarons()
     })
     
 def searchtarget(request):

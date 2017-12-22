@@ -11,6 +11,8 @@ def getMatchesFromMatchlist(matchlist, gameinfo, season, queue, summonerName):
     if len(matchlist['matches']) == 0: return []
     else:
         for match in matchlist['matches']:
+            #this stuff just checks if a match is in the parameter season and queue.
+            #if they're none, then no check is made for season or queue.
             isValid = True if season == None else season.value == match['season']
             if isValid:
                 isValid = True if queue == None else queue.value == match['queue']
@@ -29,6 +31,7 @@ class MatchList():
     summoner = ''
     season = 0
     queue = 0
+    
     dragonKillList = []
     
     def __str__(self):
@@ -459,4 +462,18 @@ class MatchList():
                 winrates.append(v)
             
         return winrates
+    
+    def avgBarons(self):
+        '''
+        Returns the average number of barons this summoner's team kills in their games.
+
+        @rtype: a number
+        @return: average baron kills per game
+        '''
+        if self.size() == 0:
+            return 0
+        numBarons = 0
+        for match in self.matches:
+            numBarons+= match.barons()
+        return numBarons  /  self.size()
     
