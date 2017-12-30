@@ -178,30 +178,38 @@ def search(request, name):
         'vsPlayersTeam'  : vsPlayersTeamList,
     })
     '''
-    matchList = MatchList(getInfoGetter(), name, maxMatches=30, queue=QueueType.RANKED_SOLODUO)
+    matchList = MatchList(getInfoGetter(), name, maxMatches=10)
     #remember that you wrote the text 'in PST only' into search.html
-
+    assert len(matchList.pctElementalKilledByOrder()) < 6
     return render(request, 'search/search.html', {
-        'name'            : name                                                              ,
-        'overview'        : str(matchList)                                                    ,
+        'name'             : name,
+        'overview'         : str(matchList),
         #By time
-        'winratesByTime'  : wrListToStringList(matchList.winrateByTime())                     ,
+        'winratesByTime'   : wrListToStringList(matchList.winrateByTime()),
         
         #OtherSummoners:
-        'otherSummonersWr': wrListToStringList(matchList.winrateByOtherSummoners())           ,
+        'otherSummonersWr' : wrListToStringList(matchList.winrateByOtherSummoners()),
         
         #Dragons:
         #(dicts turned into lists for easier html display)
-        'pctElementals'   : matchList.pctAllElemental()                                       ,
-        'pctElders'       : matchList.pctAllElders()                                          ,
-        'pctOfEachType'   : matchList.pctDragonsKilledByType().items()                        ,
-        'pctOfTotalByType': matchList.pctEachDragonType().items()                             ,
-        'pctEleByOrder'   : matchList.pctElementalKilledByOrder()                             ,
-        'pctElderByOrder' : matchList.pctElderKilledByOrder()                                 ,
+        'pctElementals'    : matchList.pctAllElemental(),
+        'pctElders'        : matchList.pctAllElders(),
+        'pctOfEachType'    : matchList.pctDragonsKilledByType().items(),
+        'pctOfTotalByType' : matchList.pctEachDragonType().items(),
+        'pctEleByOrder'    : matchList.pctElementalKilledByOrder(),
+        'pctElderByOrder'  : matchList.pctElderKilledByOrder(),
+        
+        #Dragon time info:
+        'firstDragTime'    : matchList.firstElementalDragonTime(),
+        'enemyContDragInfo': matchList.timePercentEnemyContestedElementalDragons(),
+        'enemyB2BDragInfo' : matchList.timePercentEnemyBackToBackElementalDragons(),
+        'contDragInfo'     : matchList.timePercentContestedElementalDragons(),
+        'b2BDragInfo'      : matchList.timePercentBackToBackElementalDragons(),
         
         #Barons:
-        'avgBarons'       : matchList.avgBarons()
+        'avgBarons'        : matchList.avgBarons(),
+        
     })
-    
+
 def searchtarget(request):
     return redirect('search:search',request.POST['summonerName'])

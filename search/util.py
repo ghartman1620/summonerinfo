@@ -1,5 +1,4 @@
-
-    
+from datetime import timedelta
 class DragonKill():
     thisSummonerKilled = False
     type = None
@@ -11,7 +10,7 @@ class DragonKill():
     def __str__(self):
         return ('This summoner killed ' if self.thisSummonerKilled else \
                  'The enemy team killed ') + str(self.type)\
-                 + ' at ' + str(self.timestamp)
+                 + ' at ' + str(timedelta(milliseconds=self.timestamp))
     def __eq__(self, other):
         return self.thisSummonerKilled == other.thisSummonerKilled and \
                self.type == other.type and \

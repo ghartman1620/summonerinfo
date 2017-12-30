@@ -19,7 +19,20 @@
 {% if overview %}
 <p>{{overview}}</p>
 {% endif %}
-<p> times in PST</p>
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#winrates" aria-expanded="true" aria-controls="winrates">
+Winrate Statistics
+</button>
+
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#dragonInfo" aria-expanded="true" aria-controls="dragonInfo">
+Dragons
+</button>
+
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#baronInfo" aria-expanded="true" aria-controls="baronInfo">
+Baron Info
+</button>
+
+<div class="collapse" id="winrates" style="">
+<h3> Winrate Statistics </h3>
 {% if winratesByTime %}
 {% for wr in winratesByTime %}
 <p>{{wr}}</p>
@@ -33,9 +46,14 @@
 <p> {{wr}}</p>
 {% endfor %}
 {% endif %}
+</div>
 
 
-<h3>Dragons</h3>
+
+
+<div class="collapse" id="dragonInfo" style="">
+<h3> Dragons </h3>
+
 <p>Percent of total elemental drakes you kill: {{pctElementals}}</p>
 <p>Percent of total elder drakes you kill: {{pctElders}}</p>
 
@@ -55,22 +73,139 @@
 {% if pctEleByOrder %}
 <p> You kill the following percentage of the elemental dragons by order in your games: </p>
 {% for d in pctEleByOrder %}
-	<p>{{d}}</p>
+	<p>{{forloop.counter}}:{{d}}</p>
 {% endfor %}
 {% endif %}
 
 {% if pctElderByOrder %}
 <p> You kill the following percentage of the elder dragons by order in your games: </p>
-
 {% for d in pctElderByOrder %}
-<p>{{d}} </p>
+<p>{{forloop.counter}}{{d}} </p>
 {% endfor %}
 
 {% endif %}
 
+{% comment %}
+All the timePercent dragon functions return a pair - a timedelta and a percentage.
+Dragon time info:
+'firstDragTime'    : matchList.firstElementalDragonTime(),
+'enemyContDragInfo': matchList.timePercentEnemyContestedElementalDragons(),
+'enemyB2BDragInfo' : matchList.timePercentEnemyBackToBackElementalDragons(),
+'contDragInfo'     : matchList.timePercentContestedElementalDragons(),
+'b2BDragInfo'      : matchList.timePercentBackToBackElementalDragons(),
+{% endcomment %}
+<p> When you get the first dragon, you get it on average at {{firstDragTime}}</p>
+<p> After the enemy takes an elemental drake, you take the next elemental drake {{contDragInfo.1}}% of the time in an average of {{contDragInfo.0}}</p>
+<p> After the enemy takes an elemental drake, you lose the next elemental drake {{enemyB2BDragInfo.1}}% of the time in an average of {{enemyB2BDragInfo.0}}</p>
+<p> After you take an elemental drake, you take the next elemental drake {{b2BDragInfo.1}}% of the time in an average of {{b2BDragInfo.0}}</p>
+<p> After you take an elemental drake, you lose the next elemental drake {{enemyContDragInfo.1}}% of the time in an average of {{enemyContDragInfo.0}}</p>
+
+</div>
+<div class="collapse" id="baronInfo" style="">
+<h3> Barons </h3>
 <p>Average number of barons killed per game: {{avgBarons}} </p>
+</div>
+{% comment %}
+This doesn't work the way I want and it does wierd things.
+<h1> new layout </h1>
+<div id="accordion" role="tablist">
+  <div class="card">
+    <div class="card-header" role="tab" id="headingOne">
+      <h5 class="mb-0">
+        <a data-toggle="collapse" href="#winrates2" role="button" aria-expanded="true" aria-controls="winrates2">
+          Winrate Statistics
+        </a>
+      </h5>
+    </div>
 
+    <div id="winrates2" class="collapse" role="tabpanel" aria-labelledby="headingOne" data-parent="#accordion">
+      <div class="card-body">
+		<h3> Winrate Statistics </h3>
+		{% if winratesByTime %}
+		{% for wr in winratesByTime %}
+		<p>{{wr}}</p>
+		{% endfor %}
+		{% endif %}
+		
+		
+		{% if otherSummonersWr %}
+		<p> Players with whom you've played more than two games (Games you won, games played)</p>
+		{% for wr in otherSummonersWr %}
+		<p> {{wr}}</p>
+		{% endfor %}
+		{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" role="tab" id="headingTwo">
+      <h5 class="mb-0">
+        <a class="collapsed" data-toggle="collapse" href="#dragons2" role="button" aria-expanded="false" aria-controls="dragons2">
+          Dragons
+        </a>
+      </h5>
+    </div>
+    <div id="dragons2" class="collapse" role="tabpanel" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div class="card-body">
+		<h3> Dragons </h3>
+		
+		<p>Percent of total elemental drakes you kill: {{pctElementals}}</p>
+		<p>Percent of total elder drakes you kill: {{pctElders}}</p>
+		
+		{% if pctOfEachType %}
+		<p> Of the drakes you kill, you get the following:</p>
+		{% for d in pctOfEachType %}
+			<p>{{d}}</p>
+		{% endfor %}
+		{% endif %}
+		
+		{% if pctOfTotalByType %}
+		<p> of the total drakes of each type in your game, you kill the following of each:</p>
+		{% for d in pctOfTotalByType %}
+			<p>{{d}}</p>
+		{% endfor %}
+		{% endif %}
+		{% if pctEleByOrder %}
+		<p> You kill the following percentage of the elemental dragons by order in your games: </p>
+		{% for d in pctEleByOrder %}
+			<p>{{forloop.counter}}:{{d}}</p>
+		{% endfor %}
+		{% endif %}
+		
+		{% if pctElderByOrder %}
+		<p> You kill the following percentage of the elder dragons by order in your games: </p>
+		{% for d in pctElderByOrder %}
+		<p>{{forloop.counter}}{{d}} </p>
+		{% endfor %}
+		
+		{% endif %}
 
+		<p> When you get the first dragon, you get it on average at {{firstDragTime}}</p>
+		<p> After the enemy takes an elemental drake, you take the next elemental drake {{contDragInfo.1}}% of the time in an average of {{contDragInfo.0}}</p>
+		<p> After the enemy takes an elemental drake, you lose the next elemental drake {{enemyB2BDragInfo.1}}% of the time in an average of {{enemyB2BDragInfo.0}}</p>
+		<p> After you take an elemental drake, you take the next elemental drake {{b2BDragInfo.1}}% of the time in an average of {{b2BDragInfo.0}}</p>
+		<p> After you take an elemental drake, you lose the next elemental drake {{enemyContDragInfo.1}}% of the time in an average of {{enemyContDragInfo.0}}</p>
+				
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" role="tab" id="headingThree">
+      <h5 class="mb-0">
+        <a class="collapsed" data-toggle="collapse" href="#barons2" role="button" aria-expanded="false" aria-controls="barons2">
+          Barons
+        </a>
+      </h5>
+    </div>
+    <div id="barons2" class="collapse" role="tabpanel" aria-labelledby="headingThree" data-parent="#accordion">
+      <div class="card-body">
+		<h3> Barons </h3>
+		<p>Average number of barons killed per game: {{avgBarons}} </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endcomment %}
 
 
 

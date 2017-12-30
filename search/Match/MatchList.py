@@ -3,7 +3,7 @@ from search.WinrateTypes.WinrateByTimeOfDay import WinrateByTimeOfDay
 from search.WinrateTypes.WinrateByOtherSummoner import WinrateByOtherSummoner
 from search.GameConstants import Dragon
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import math
     
 def getMatchesFromMatchlist(matchlist, gameinfo, season, queue, summonerName):
@@ -32,7 +32,22 @@ class MatchList():
     season = 0
     queue = 0
     
+    #This instance variable holds a list of lists 
+    #holding the results of calls to dragons() on every match
+    #in this matchlist.
     dragonKillList = []
+    #These instance variables hold the result of generateDragonTimeInfo().
+    #They are saved this way instead of computed individually on the appropriate
+    #function call because they can be computed all at once easily rather than 
+    #requiring extra iterations over the dragon kill list by computing them individually.
+    backToBackDragons =None # number of dragons you get that were preceded by a team dragon kill
+    backToBackDragonTime =None# average time it takes your team to get dragons that are preceded by a team dragon kill
+    contestedDragons =None# number of dragons you get that were preceded by an enemy dragon kill
+    contestedDragonTime =None# average time it takes your team to get dragons that are preceded by an enemy dragon kill
+    enemyBackToBackDragons =None# number of dragons you lose that were preceded by an enemy dragon kill
+    enemyBackToBackDragonTime =None# average time it takes the enemy to get dragons that are preceded by an enemy dragon kill
+    enemyContestedDragons =None# number of dragons you lose that were preceded by a team dragon kill
+    enemyContestedDragonTime =None# average time it takes the enemy to get dragons that are preceded by a team dragon kill
     
     def __str__(self):
         return str(len(self.matches)) + ' matches analyzed. ' +(('queue: ' + str(self.queue)) if self.queue != None else '') + \
@@ -282,6 +297,128 @@ class MatchList():
             while len(dragons) < len(lostDragonsByOrder):
                 dragons.append(0)
         return dragons
+    
+    
+    def firstElementalDragonTime(self):
+        '''
+        Returns a timedelta object with the average time at which this summoner
+        kills the first dragon when they kill it.
+        
+        @rtype timedelta
+        @return average time of first dragon
+        '''
+        
+        firstDragonTimes = []
+        for dkL in self.dragonKillList:
+            if dkL != [] and dkL[0].thisSummonerKilled:
+                firstDragonTimes.append(dkL[0].timestamp)
+        
+        return timedelta(milliseconds=sum(firstDragonTimes)/len(firstDragonTimes))
+
+    def timePercentEnemyContestedElementalDragons(self):
+        '''
+        Returns the percent of enemy dragon kills that are preceded by one of your dragon kills 
+        and the average time it takes the enemy to secure such dragons.
+        
+        @rtype (timedelta,num)
+        @return a pair - first of the average time for the enemy to kill dragons after you kill them
+                the second the percentage of your dragon kills that are followed by enemy dragon kills
+        '''
+        if self.enemyContestedDragonTime == None:
+            self.generateDragonTimeInfo()
+        return (self.enemyContestedDragonTime, 100*self.enemyContestedDragons/(self.enemyContestedDragons+self.backToBackDragons))
+    def timePercentEnemyBackToBackElementalDragons(self):
+        '''
+        Returns the percent of enemy dragon kills that are preceded by one of their dragon kills
+        and the average time it takes the enemy to secure such dragons.
+        
+        @rtype (timedelta,num)
+        @return a pair - first of the average time for the enemy to kill dragons after they kill them
+                the second the percentage of enemy dragon kills that are followed by enemy dragon kills.
+        '''
+        if self.enemyBackToBackDragonTime == None:
+            self.generateDragonTimeInfo()
+        return (self.enemyBackToBackDragonTime, 100*self.enemyBackToBackDragons/(self.enemyBackToBackDragons+self.contestedDragons))
+
+    def timePercentContestedElementalDragons(self):
+        '''
+        Returns the percent of your dragon kills that are preceded by an enemy dragon kill
+        and the average time it takes you to secure such dragons.
+        
+        @rtype (timedelta,num)
+        @return a pair - first of the average time for you to kill dragons after the enemy kills them
+                the second the percentage of enemy dragon kills that are followed by your dragon kills.
+        '''
+        if self.contestedDragonTime == None:
+            self.generateDragonTimeInfo()
+        return (self.contestedDragonTime, 100*self.contestedDragons/(self.contestedDragons+self.enemyBackToBackDragons))
+    def timePercentBackToBackElementalDragons(self):
+        '''
+        Returns the percent of your dragon kills that are followed by another of your dragon kills
+        and the average time it takes you to secure such dragons.
+        
+        @rtype (timedelta,num)
+        @return a pair - first of the average time for you to kill dragons after you kill them
+                the second the percentage of your dragon kills that are followed by another of your dragon kills.
+        '''
+        if self.backToBackDragonTime == None:
+            self.generateDragonTimeInfo()
+        return (self.backToBackDragonTime, 100*self.backToBackDragons/(self.enemyContestedDragons+self.backToBackDragons))
+                
+    
+    def generateDragonTimeInfo(self):
+        '''
+        This helper function is called by the four above functions that return
+        information about dragon kill times. It generates that info.
+        
+        This function exists because the four above computations are all interdependent
+        and by computing one it is trivally easy to compute the others- so we'll do them all at once,
+        here.
+        Assigns:
+        backToBackDragons - number of dragons you get that were preceded by a team dragon kill
+        backToBackDragonTime - average time it takes your team to get dragons that are preceded by a team dragon kill
+        contestedDragons - number of dragons you get that were preceded by an enemy dragon kill
+        contestedDragonTime - average time it takes your team to get dragons that are preceded by an enemy dragon kill
+        enemyBackToBackDragons - number of dragons you lose that were preceded by an enemy dragon kill
+        enemyBackToBackDragonTime - average time it takes the enemy to get dragons that are preceded by an enemy dragon kill
+        enemyContestedDragons - number of dragons you lose that were preceded by a team dragon kill
+        enemyContestedDragonTime - average time it takes the enemy to get dragons that are preceded by a team dragon kill
+        '''
+        backToBackDragonTimes = []
+        contestedDragonTimes = []
+        enemyBackToBackDragonTimes = []
+        enemyContestedDragonTimes = []
+        self.backToBackDragons = 0
+        self.contestedDragons = 0
+        self.enemyBackToBackDragons = 0
+        self.enemyContestedDragons = 0
+        for dkL in self.dragonKillList:
+            i = 0
+            while i < len(dkL):
+                if dkL[i].type == Dragon.ELDER:
+                    break
+                if dkL[i].thisSummonerKilled:
+                    if i!=0:
+                        if dkL[i-1].thisSummonerKilled:
+                            self.backToBackDragons +=1
+                            backToBackDragonTimes.append(dkL[i].timestamp-dkL[i-1].timestamp)
+                        else:
+                            self.contestedDragons+=1
+                            contestedDragonTimes.append(dkL[i].timestamp-dkL[i-1].timestamp)
+                else:
+                    if i!=0:
+                        if dkL[i-1].thisSummonerKilled:
+                            self.enemyContestedDragons+=1
+                            enemyContestedDragonTimes.append(dkL[i].timestamp-dkL[i-1].timestamp)
+                        else:
+                            self.enemyBackToBackDragons+=1
+                            enemyBackToBackDragonTimes.append(dkL[i].timestamp-dkL[i-1].timestamp)
+                i+=1
+        self.contestedDragonTime = timedelta(milliseconds=sum(contestedDragonTimes)/len(contestedDragonTimes))
+        self.backToBackDragonTime = timedelta(milliseconds=sum(backToBackDragonTimes)/len(backToBackDragonTimes))
+        self.enemyContestedDragonTime = timedelta(milliseconds=sum(enemyContestedDragonTimes)/len(enemyContestedDragonTimes))
+        self.enemyBackToBackDragonTime = timedelta(milliseconds=sum(enemyBackToBackDragonTimes)/len(enemyBackToBackDragonTimes))
+        
     '''
     THIS code is bad. it is here as a reminder of how not to write code.
     The functionality of this function is implemented by the several functions above that deal with 

@@ -170,6 +170,27 @@ class SmallMatchListTest(TestCase):
         self.assertEqual(self.matchlist.pctElementalKilledByOrder(), [40.0, 75.0, 25.0, 0.0, 100.0])
     def testPctElderKilledByOrderIsEmpty(self):
         self.assertEqual(self.matchlist.pctElderKilledByOrder(), [])
+    
+    def testAvgFirstDragonTime(self):
+        firstDragon = self.matchlist.firstElementalDragonTime()
+        self.assertEqual(firstDragon.seconds, 493)
+    def testTimePercentEnemyContDragons(self):
+        result = self.matchlist.timePercentEnemyContestedElementalDragons()
+        self.assertEqual(result[0].seconds, 384)
+        self.assertEqual(result[1], 40)
+    def testTimePercentEnemyB2BDragons(self):
+        result = self.matchlist.timePercentEnemyBackToBackElementalDragons()
+        self.assertEqual(result[0].seconds, 426)
+        self.assertEqual(result[1], 60)
+    def testTimePercentContDragons(self):
+        result = self.matchlist.timePercentContestedElementalDragons()
+        self.assertEqual(result[0].seconds, 416)
+        self.assertEqual(result[1], 40)
+    def testTimePercentB2BDragons(self):
+        result = self.matchlist.timePercentBackToBackElementalDragons()
+        self.assertEqual(result[0].seconds, 437)
+        self.assertEqual(result[1], 60)
+         
     #def testTimeFirstDragon(self):
         #self.assertEqual(493, self.matchlist.avgFirstDragonTime())
     '''
