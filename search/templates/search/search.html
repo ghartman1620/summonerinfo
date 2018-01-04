@@ -275,8 +275,11 @@ Dragon time info:
 </div>
 
 <div class="collapse" id="kills" style="position:relative;">
+<div id="displayTime">25:00-26:00 </div>
+<input type="range" min="1" max="50" value="25" class="slider" id="killTime">
 <img src="/static/minimap.png" style="position:absolute;x:0;y:0;"></img>
-<div id='heatMap' style="height: 742px;z-axis=1;">
+<div id="heatMap" style="height: 742px;z-axis=1;">
+
 
 </div>
 </div>
@@ -285,37 +288,44 @@ Dragon time info:
 <script src="{% static 'search/heatmap.min.js' %}"></script>
 
 <script>
-
-function setupHeatmap(){
-	window.setTimeout(setupHeatmapHelper, 750);
-}
-function setupHeatmapHelper() {
-  if (typeof setupHeatmapHelper.up == 'undefined'){
-  		setupHeatmapHelper.up = false;
-  }
-  if (typeof setupHeatmapHelper.hm == 'undefined'){
-  	setupHeatmapHelper.hm = h337.create({
-	    container: document.getElementById('heatMap')
-	});
-  }
-  if (!setupHeatmapHelper.up){
-  	  var points = [];
-  	  {% for kill in championKills %}
-  	  points.push({x: {{kill.x}}, y: {{kill.y}}, value: 25});
-  	  {% endfor %}
-	  var testData = {
-	        min: 0,
-	        max: 200,
-	        data: points
-	  };
-	  setupHeatmapHelper.hm.setData(testData);
-	  setupHeatmapHelper.up = true;
-  }
-  else{
-  	setupHeatmapHelper.hm.setData({min:0, max:0, data: []});
-  	setupHeatmapHelper.up = false;
-  }
-}
+	var kills = [];
+	{% for kill in championKills %}
+		kills.push({x: {{kill.x}}, y: {{kill.y}}, timestamp: {{kill.timestamp}}, isKill: "{{kill.isKill}}" }); 
+	{% endfor %}
+	var slider = document.getElementById("killTime");
+	var killTime = document.getElementById("displayTime");
+	slider.oninput = killTimeSlide;
+	
+	function killTimeSlide(){
+		killTime.innerHTML = (slider.value-1) + ':00-' + slider.value+':00';
+		setupHeatmapHelper(slider.value-1);
+	}
+	function setupHeatmap(){
+		window.setTimeout(function() { setupHeatmapHelper(25); }, 750);
+	}
+	function setupHeatmapHelper(time) {
+		if (typeof setupHeatmapHelper.hm == 'undefined'){
+  			setupHeatmapHelper.hm = h337.create({
+	    		container: document.getElementById('heatMap')
+			});
+		}
+		var points = [];
+		for(i = 0; i < kills.length; i++){
+			//if(kills[i].timestamp/60000 /* minutes */ > time && kills[i].timestamp/60000 < time+1){
+				points.push({
+					x: kills[i].x,
+					y: kills[i].y,
+					value: 25
+				});  
+			//}
+		}
+  		var testData = {
+        	min: 0,
+        	max: 200,
+        	data: points
+  		};
+	  	setupHeatmapHelper.hm.setData(testData);
+	}
 
 </script>
 

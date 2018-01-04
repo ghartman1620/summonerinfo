@@ -330,15 +330,18 @@ class MatchList():
         kills = []
         for match in self.matches:
             killList = match.kills()
+            print(str(killList))
             i= 0
             while i < len(killList):
                 #returned by Match x and y are:
                 #x - a coordinate x [-120, 14870]
                 #y - a coordinate y  [-120, 14980]
                 #map x and y to integers in 0 to 510
+                #also y needs to get flipped because html coords
+                #and ingame coords are different
                 killList[i] = ChampionKill(killList[i].isKill,
                                            int(510*(120+killList[i].x)/14990),
-                                           int(510*(120+killList[i].y)/15100),
+                                           510-int(510*(120+killList[i].y)/15100),
                                            killList[i].timestamp)
 
                 i+=1
@@ -362,7 +365,8 @@ class MatchList():
         for dkL in self.dragonKillList:
             if dkL != [] and dkL[0].thisSummonerKilled:
                 firstDragonTimes.append(dkL[0].timestamp)
-        
+        if len(firstDragonTimes) == 0:
+            return timedelta(0)
         return timedelta(milliseconds=sum(firstDragonTimes)/len(firstDragonTimes))
 
     def timePercentEnemyContestedElementalDragons(self):

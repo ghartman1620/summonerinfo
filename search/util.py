@@ -59,7 +59,7 @@ class ChampionKill():
     def __eq__(self, other):
         return self.isKill == other.isKill and self.x == other.x and self.y == other.y and self.timestamp == other.timestamp
     def __str__(self):
-        return ('kill' if self.isKill else 'assist') + ' at (' + str(self.x) + ',' + str(self.y) + ')' + ' at ' + str(self.timestamp)
+        return ('kill' if self.isKill else 'assist') + ' at (' + str(self.x) + ',' + str(self.y) + ')' + ' at ' + str(timedelta(milliseconds=self.timestamp)) + ' timestamp ' + str(self.timestamp)
     def __repr__(self):
         return self.__str__()
     

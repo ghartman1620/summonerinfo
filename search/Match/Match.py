@@ -23,11 +23,10 @@ class Match():
         self.timestamp = time
         self.timeline = tl
         self.teamid = self.thisSummonersTeamId()
-        i = 0
+
         for participant in self.matchDto['participantIdentities']:
             if participant['player']['summonerName'].lower() == self.summoner:
-                self.participantId = i
-            i+=1
+                self.participantId = participant['participantId']
         assert hasattr(self, 'participantId'), 'searched summoner not in a particular game'
     def thisSummonersTeamId(self):
         for i in range(0,5):
@@ -111,6 +110,8 @@ class Match():
         kills = []
         for frame in self.timeline['frames']:
             for event in frame['events']:
+                if event['type'] == 'CHAMPION_KILL':
+                    print(str(event))
                 if event['type'] == 'CHAMPION_KILL' and (self.participantId == event['killerId'] or self.participantId in event['assistingParticipantIds']):
                     kills.append(ChampionKill(self.participantId == event['killerId'], event['position']['x'], event['position']['y'], event['timestamp']))
         return kills
