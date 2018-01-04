@@ -5,16 +5,13 @@ Created on Nov 25, 2017
 '''
 
 from search.WinrateTypes.WinrateByOtherSummoner import WinrateByOtherSummoner
-from search.GameConstants import Team, Dragon
-from search.util import DragonKill
+from search.GameConstants import Dragon
+from search.util import DragonKill, TowerKill, ChampionKill
 
 BLUE_TEAM = 100
 RED_TEAM = 200
 class Match():
-    matchDto = dict()
-    timestamp = 0
-    timeline = dict()
-    summoner = ''
+
     
     def __init__(self, matchInfo, summonerName, time, tl):
         self.matchDto = matchInfo
@@ -25,7 +22,13 @@ class Match():
         self.summoner = summonerName.lower()
         self.timestamp = time
         self.timeline = tl
-        
+        self.teamid = self.thisSummonersTeamId()
+        i = 0
+        for participant in self.matchDto['participantIdentities']:
+            if participant['player']['summonerName'].lower() == self.summoner:
+                self.participantId = i
+            i+=1
+        assert hasattr(self, 'participantId'), 'searched summoner not in a particular game'
     def thisSummonersTeamId(self):
         for i in range(0,5):
             if self.matchDto['participantIdentities'][i]['player']['summonerName'].lower() == self.summoner:
@@ -81,6 +84,36 @@ class Match():
                             ,Dragon.fromStr(event['monsterSubType'])
                             ,event['timestamp']))
         return dragons
+    
+    def towers(self):
+        '''
+        Returns a list of TowerKill objects corresponding to each tower destroyed in this Match.
+        TowerKill objects have:
+        tier: inner outer base nexus
+        lane
+        timestamp
+        team - the team whose turret was destroyed, NOT who did the destroying
+        @rtype list of TowerKills
+        @return the Towers destroyed in this game
+        '''
+        towers = []
+        for frame in self.timeline['frames']:
+            for event in frame['events']:
+                if event['type'] == 'BUILDING_KILL' and event['buildingType'] == 'TOWER_BUILDING':
+                    towers.append(TowerKill(event['towerType'], event['laneType'], event['timestamp'], event['teamId']))
+        return towers
+    def kills(self):
+        '''
+        Returns a list of ChampionKill objects corresponding to each champion killed or assisted
+        by the searching summoner and no others.
+        
+        '''
+        kills = []
+        for frame in self.timeline['frames']:
+            for event in frame['events']:
+                if event['type'] == 'CHAMPION_KILL' and (self.participantId == event['killerId'] or self.participantId in event['assistingParticipantIds']):
+                    kills.append(ChampionKill(self.participantId == event['killerId'], event['position']['x'], event['position']['y'], event['timestamp']))
+        return kills
     
     def isWin(self):
         

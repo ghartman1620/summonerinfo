@@ -1,0 +1,295 @@
+.text { 
+	color: blue;
+}
+.demo-wrapper { height:400px; background:rgba(0,0,0,.03); border:3px solid black; }
+.heatmap { width:100%; height:100%; }
+.heatmap-wrapper {
+	height: 510px;
+	width:510px;
+	border: 3px solid black;
+}
+.killheatmap {
+	width:100%;
+	height:100%;
+}
+.towerdisplay {
+	height:560px;
+	position:absolute;
+}
+/*  Win game, get turrets */
+#to-kill-win{
+	position:absolute;
+	left: 110px;
+	top: 74px;
+}
+#ti-kill-win{
+	position:absolute;
+	left:255px;
+	top:70px;
+}
+#tb-kill-win{
+	position:absolute;
+	left:345px;
+	top:70px;
+}
+#mo-kill-win{
+	position:absolute;
+	left:280px;
+	top:244px;
+}
+#mi-kill-win{
+	position:absolute;
+	left: 327px;
+	top: 193px;
+}
+#mb-kill-win{
+	position:absolute;
+	left: 371px;
+	top: 152px;
+}
+#bo-kill-win{
+	position:absolute;
+	left:456px;
+	top:407px;
+}
+#bi-kill-win{
+	position:absolute;
+	left: 451px;
+	top: 252px;
+}
+#bb-kill-win{
+	position:absolute;
+	left: 456px;
+	top: 182px;
+}
+#mn-kill-win{
+	position:absolute;
+	left: 416px;
+	top: 102px;
+}
+/* Win game, lose turrets */
+#to-lost-win{
+	position:absolute;
+	left: 16px;
+	top: 163px;
+}
+#ti-lost-win{
+	position:absolute;
+	left:24px;
+	top:293px;
+}
+#tb-lost-win{
+	position:absolute;
+	left:21px;
+	top:387px;
+}
+#mo-lost-win{
+	position:absolute;
+	left:196px;
+	top:322px;
+}
+#mi-lost-win{
+	position:absolute;
+	left: 146px;
+	top: 367px;
+}
+#mb-lost-win{
+	position:absolute;
+	left: 106px;
+	top: 412px;
+}
+#bo-lost-win{
+	position:absolute;
+	left:346px;
+	top:497px;
+}
+#bi-lost-win{
+	position:absolute;
+	left: 226px;
+	top: 497px;
+}
+#bb-lost-win{
+	position:absolute;
+	left: 136px;
+	top: 497px;
+}
+#mn-lost-win{
+	position:absolute;
+	left: 65px;
+	top: 450px;
+}
+/*  Lose game, kill turrets */
+#to-kill-lose{
+	position:absolute;
+	left: 670px;
+	top: 74px;
+}
+#ti-kill-lose{
+	position:absolute;
+	left:815px;
+	top:70px;
+}
+#tb-kill-lose{
+	position:absolute;
+	left:905px;
+	top:70px;
+}
+#mo-kill-lose{
+	position:absolute;
+	left:840px;
+	top:244px;
+}
+#mi-kill-lose{
+	position:absolute;
+	left: 887px;
+	top: 193px;
+}
+#mb-kill-lose{
+	position:absolute;
+	left: 931px;
+	top: 152px;
+}
+#bo-kill-lose{
+	position:absolute;
+	left: 1016px;
+	top:407px;
+}
+#bi-kill-lose{
+	position:absolute;
+	left: 1011px;
+	top: 252px;
+}
+#bb-kill-lose{
+	position:absolute;
+	left: 1016px;
+	top: 182px;
+}
+#mn-kill-lose{
+	position:absolute;
+	left: 976px;
+	top: 102px;
+}
+/* Lose game, lose turrets */
+#to-lost-lose{
+	position:absolute;
+	left: 576px;
+	top: 163px;
+}
+#ti-lost-lose{
+	position:absolute;
+	left:574px;
+	top:293px;
+}
+#tb-lost-lose{
+	position:absolute;
+	left:571px;
+	top:387px;
+}
+#mo-lost-lose{
+	position:absolute;
+	left:756px;
+	top:322px;
+}
+#mi-lost-lose{
+	position:absolute;
+	left: 706px;
+	top: 367px;
+}
+#mb-lost-lose{
+	position:absolute;
+	left: 666px;
+	top: 412px;
+}
+#bo-lost-lose{
+	position:absolute;
+	left:906px;
+	top:497px;
+}
+#bi-lost-lose{
+	position:absolute;
+	left: 786px;
+	top: 497px;
+}
+#bb-lost-lose{
+	position:absolute;
+	left: 696px;
+	top: 497px;
+}
+#mn-lost-lose{
+	position:absolute;
+	left:625px;
+	top: 450px;
+}
+
+
+#to-kill-win:hover~#towerinfo .to-kill-win ,
+#ti-kill-win:hover~#towerinfo .ti-kill-win ,
+#tb-kill-win:hover~#towerinfo .tb-kill-win ,
+#mo-kill-win:hover~#towerinfo .mo-kill-win ,
+#mi-kill-win:hover~#towerinfo .mi-kill-win ,
+#mb-kill-win:hover~#towerinfo .mb-kill-win ,
+#bo-kill-win:hover~#towerinfo .bo-kill-win ,
+#bi-kill-win:hover~#towerinfo .bi-kill-win ,
+#bb-kill-win:hover~#towerinfo .bb-kill-win ,
+#mn-kill-win:hover~#towerinfo .mn-kill-win ,
+#to-lost-win:hover~#towerinfo .to-lost-win ,
+#ti-lost-win:hover~#towerinfo .ti-lost-win ,
+#tb-lost-win:hover~#towerinfo .tb-lost-win ,
+#mo-lost-win:hover~#towerinfo .mo-lost-win ,
+#mi-lost-win:hover~#towerinfo .mi-lost-win ,
+#mb-lost-win:hover~#towerinfo .mb-lost-win ,
+#bo-lost-win:hover~#towerinfo .bo-lost-win ,
+#bi-lost-win:hover~#towerinfo .bi-lost-win ,
+#bb-lost-win:hover~#towerinfo .bb-lost-win ,
+#mn-lost-win:hover~#towerinfo .mn-lost-win ,
+#to-kill-lose:hover~#towerinfo .to-kill-lose ,
+#ti-kill-lose:hover~#towerinfo .ti-kill-lose ,
+#tb-kill-lose:hover~#towerinfo .tb-kill-lose ,
+#mo-kill-lose:hover~#towerinfo .mo-kill-lose ,
+#mi-kill-lose:hover~#towerinfo .mi-kill-lose ,
+#mb-kill-lose:hover~#towerinfo .mb-kill-lose ,
+#bo-kill-lose:hover~#towerinfo .bo-kill-lose ,
+#bi-kill-lose:hover~#towerinfo .bi-kill-lose ,
+#bb-kill-lose:hover~#towerinfo .bb-kill-lose ,
+#mn-kill-lose:hover~#towerinfo .mn-kill-lose ,
+#to-lost-lose:hover~#towerinfo .to-lost-lose ,
+#ti-lost-lose:hover~#towerinfo .ti-lost-lose ,
+#tb-lost-lose:hover~#towerinfo .tb-lost-lose ,
+#mo-lost-lose:hover~#towerinfo .mo-lost-lose ,
+#mi-lost-lose:hover~#towerinfo .mi-lost-lose ,
+#mb-lost-lose:hover~#towerinfo .mb-lost-lose ,
+#bo-lost-lose:hover~#towerinfo .bo-lost-lose ,
+#bi-lost-lose:hover~#towerinfo .bi-lost-lose ,
+#bb-lost-lose:hover~#towerinfo .bb-lost-lose ,
+#mn-lost-lose:hover~#towerinfo .mn-lost-lose {
+    display: block;
+}
+
+#towerinfo div{
+    display: none;
+    position:absolute;
+    left:500px;
+    top:0px;
+    font-size: 20pt;
+}
+
+#winmap {
+	position:absolute;
+	left:0px;
+	top:50px;
+	z-index:-1;
+}
+#winmap {
+	position:absolute;
+	left:0px;
+	top:50px;
+	z-index:-1;
+}
+#lossmap {
+	position:absolute;
+	left:560px;
+	top:50px;
+	z-index:-1;
+}
+
+

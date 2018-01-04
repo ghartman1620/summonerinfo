@@ -178,7 +178,7 @@ def search(request, name):
         'vsPlayersTeam'  : vsPlayersTeamList,
     })
     '''
-    matchList = MatchList(getInfoGetter(), name, maxMatches=10)
+    matchList = MatchList(getInfoGetter(), name, maxMatches=int(request.session['numMatches']))
     #remember that you wrote the text 'in PST only' into search.html
     assert len(matchList.pctElementalKilledByOrder()) < 6
     return render(request, 'search/search.html', {
@@ -209,7 +209,17 @@ def search(request, name):
         #Barons:
         'avgBarons'        : matchList.avgBarons(),
         
+        #Towers:
+        'winTowersKilled'  : matchList.towersKilledInWins(),
+        'lossTowersKilled' : matchList.towersKilledInLosses(),
+        'winTowersLost'    : matchList.towersLostInWins(),
+        'lossTowersLost'   : matchList.towersLostInLosses(),
+        
+        #kills:
+        'championKills'    : matchList.compileKillLists()
+         
     })
 
 def searchtarget(request):
+    request.session['numMatches'] = request.POST['matches']
     return redirect('search:search',request.POST['summonerName'])

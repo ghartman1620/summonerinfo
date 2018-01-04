@@ -6,8 +6,9 @@ Created on Nov 27, 2017
 from search.GameInfoGetters.GameInfoFactory import getInfoGetter
 from search.GameConstants import Team,Dragon
 from search.Match.Match import Match
-from search.util import DragonKill
+from search.util import DragonKill, TowerKill, ChampionKill
 from django.test import TestCase
+
 class MatchTest(TestCase):
     def setUp(self):
         gameinfo = getInfoGetter(True)
@@ -76,6 +77,58 @@ class MatchTest(TestCase):
                           DragonKill(True, Dragon.AIR, 1011005), 
                           DragonKill(True, Dragon.WATER, 1409648)])
         
-        
-        
+    def testTowerList(self):
+        towers = self.match.towers()
+        self.assertEqual(towers, [
+            TowerKill('OUTER_TURRET', 'BOT_LANE', 337714, 200),
+            TowerKill('OUTER_TURRET', 'TOP_LANE', 493231, 200),
+            TowerKill('OUTER_TURRET', 'MID_LANE', 666492, 200),
+            TowerKill('INNER_TURRET', 'BOT_LANE', 820533, 200),
+            TowerKill('INNER_TURRET', 'MID_LANE', 982155, 200),
+            TowerKill('BASE_TURRET', 'MID_LANE', 995295, 200),
+            TowerKill('INNER_TURRET', 'TOP_LANE', 1388517, 200),
+            TowerKill('BASE_TURRET', 'TOP_LANE', 1405610, 200),
+            TowerKill('NEXUS_TURRET', 'MID_LANE', 1420952, 200),
+            TowerKill('NEXUS_TURRET', 'MID_LANE', 1428430, 200),
+            TowerKill('BASE_TURRET', 'BOT_LANE', 1471984, 200),
+            
+        ])
+        towers = self.match3.towers()
+        self.assertEqual(towers, [
+            TowerKill('OUTER_TURRET', 'BOT_LANE', 475913, 100),
+            TowerKill('OUTER_TURRET', 'TOP_LANE', 651552, 200),
+            TowerKill('OUTER_TURRET', 'MID_LANE', 724186, 100),
+            TowerKill('INNER_TURRET', 'BOT_LANE', 803298, 100),
+            TowerKill('OUTER_TURRET', 'TOP_LANE', 913147, 100),
+            TowerKill('INNER_TURRET', 'TOP_LANE', 939263, 100),
+            TowerKill('OUTER_TURRET', 'BOT_LANE', 960806, 200),
+            TowerKill('OUTER_TURRET', 'MID_LANE', 1061422, 200),
+            TowerKill('INNER_TURRET', 'MID_LANE', 1338571, 100),
+            TowerKill('BASE_TURRET', 'BOT_LANE', 1536714, 100),
+            TowerKill('INNER_TURRET', 'MID_LANE', 1566798, 200),
+            TowerKill('BASE_TURRET', 'MID_LANE', 1759042, 100),
+            TowerKill('NEXUS_TURRET', 'MID_LANE', 1789997, 100),
+            TowerKill('NEXUS_TURRET', 'MID_LANE', 1803638, 100),
+            
+        ])
+    def testchampionKillList(self):
+        kills = self.match.kills()
+
+        self.assertEqual(kills, [
+            ChampionKill(True, 13069, 3302, 776631),
+            ChampionKill(False, 8972, 8206, 927917),
+            ChampionKill(False, 7964, 7922, 931382),
+            ChampionKill(True, 10658, 11152, 1003367),
+            ChampionKill(False, 10741, 11145, 1003937),
+            ChampionKill(True, 10130, 8170, 1108685),
+            ChampionKill(False, 10769, 8726, 1111309),
+            ChampionKill(True, 8515, 8927, 1170333),
+            ChampionKill(False, 4953, 10426, 1271767),
+            ChampionKill(False, 4636, 9069, 1277833),
+            ChampionKill(True, 4829, 13382, 1345721),
+            ChampionKill(False, 12624, 12608, 1432802),
+            ChampionKill(False, 12874, 12856, 1435695)
+        ])
+
+    
         
