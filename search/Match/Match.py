@@ -110,8 +110,7 @@ class Match():
         kills = []
         for frame in self.timeline['frames']:
             for event in frame['events']:
-                if event['type'] == 'CHAMPION_KILL':
-                    print(str(event))
+
                 if event['type'] == 'CHAMPION_KILL' and (self.participantId == event['killerId'] or self.participantId in event['assistingParticipantIds']):
                     kills.append(ChampionKill(self.participantId == event['killerId'], event['position']['x'], event['position']['y'], event['timestamp']))
         return kills

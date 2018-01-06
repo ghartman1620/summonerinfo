@@ -1,22 +1,32 @@
 from search.Match.Match import Match
 from search.WinrateTypes.WinrateByTimeOfDay import WinrateByTimeOfDay
-from search.WinrateTypes.WinrateByOtherSummoner import WinrateByOtherSummoner
-from search.GameConstants import Dragon
+from search.GameConstants import Dragon, RolePlayed, championIds, QueueType
 from search.util import ChampionKill
 
 from datetime import datetime, timedelta
 import math
     
-def getMatchesFromMatchlist(matchlist, gameinfo, season, queue, summonerName):
+def getMatchesFromMatchlist(matchlist, gameinfo, season, queue, summonerName, championList, rolePlayed):
     matchDetails = []
     if len(matchlist['matches']) == 0: return []
     else:
         for match in matchlist['matches']:
             #this stuff just checks if a match is in the parameter season and queue.
             #if they're none, then no check is made for season or queue.
-            isValid = True if season == None else season.value == match['season']
+            isValid = season == None or season.value == match['season']
             if isValid:
-                isValid = True if queue == None else queue.value == match['queue']
+                if queue==None:
+                    isValid = match['queue'] == QueueType.NORMAL_BLIND_SR.value or \
+                              match['queue'] == QueueType.NORMAL_DRAFT_SR.value or \
+                              match['queue'] == QueueType.RANKED_SOLODUO.value or \
+                              match['queue'] == QueueType.RANKED_FLEX_SR.value
+                else:
+                    isValid = match['queue'] == queue.value
+            if isValid:
+                isValid = championList == None or match['champion'] in championList
+            if isValid:
+                isValid = rolePlayed == None or RolePlayed.matchListingIsRole(rolePlayed, match)
+                    
             
             if isValid:
                 matchDetails.append(Match(gameinfo.getMatchById(match['gameId']), summonerName, match['timestamp'],
@@ -47,6 +57,8 @@ The constructor enables callers to filter MatchLists to certain sorts of matches
 Other methods perform diagnostics on those matches.
 '''
 class MatchList():
+    
+
     matches = []
     summoner = ''
     season = 0
@@ -69,6 +81,8 @@ class MatchList():
     enemyContestedDragons =None# number of dragons you lose that were preceded by a team dragon kill
     enemyContestedDragonTime =None# average time it takes the enemy to get dragons that are preceded by a team dragon kill
 
+    
+    
     def __str__(self):
         return str(len(self.matches)) + ' matches analyzed. ' +(('queue: ' + str(self.queue)) if self.queue != None else '') + \
             (('season: ' + str(self.season)) if self.season != None else '')
@@ -78,20 +92,36 @@ class MatchList():
     @param summonerName the summoner whose matches are searched for
     @param maxMatches the maximum number of matches that will be queried. NOT the number of matches to be in the matchlist.
     @param season the season to include games from. Note that if a low number of maxMatches is specified and an old season then there will probably be no games in this MatchList.
-    @param queues queue type to query for. 
+    @param queue a string valid as passed to QueueType.fromStr()
+    @param championList a list of champions as written by the user in the format ChampionName, ChampionName, ChampionName, etc.
+    @param rolePlayed a string valid as passed to RolePlayed.fromStr()
     Values for season and queues can be found in search.GameConstants.QueueType and search.GameConstants.SeasonId
     '''
-    def __init__(self,gameinfo, summonerName, maxMatches = 100, season = None, queue = None):
+    def __init__(self,gameinfo, summonerName, maxMatches = 100, season = None, queue = None, championList = None, rolePlayed = None):
         self.matches = []
         summoner = gameinfo.getSummonerByName(summonerName)
         self.summoner = summonerName
-        id = summoner['accountId']
-        
+        self.id = summoner['accountId']
+        if rolePlayed != None and rolePlayed != "":
+            rolePlayed = RolePlayed.fromStr(rolePlayed)
+        if championList != None:
+            championList = championList.split(',')
+            i=0
+            while i < len(championList):
+                championList[i] = championList[i].strip()
+                try:
+                    championList[i] = championIds[championList[i].lower()]
+                except KeyError:
+                    raise RuntimeError('invalid champion list')
+                i+=1
+        if queue != None:
+            queue = QueueType.fromStr(queue)
         for i in range(0, math.floor(maxMatches/100)):
-            matchExt = getMatchesFromMatchlist(gameinfo.getMatchlistBySummonerId(id, i*100), gameinfo, season, queue, summonerName)
+            matchExt = getMatchesFromMatchlist(gameinfo.getMatchlistBySummonerId(self.id, i*100), gameinfo, season, queue, summonerName,championList, rolePlayed)
             self.matches.extend(matchExt)
         if maxMatches%100 != 0:
-            self.matches.extend(getMatchesFromMatchlist(gameinfo.getMatchlistBySummonerId(id, (math.floor(maxMatches/100))*100, maxMatches), gameinfo, season, queue, summonerName))
+            self.matches.extend(getMatchesFromMatchlist(gameinfo.getMatchlistBySummonerId(self.id, 
+                                                        (math.floor(maxMatches/100))*100, maxMatches), gameinfo, season, queue, summonerName, championList, rolePlayed))
         self.season = season
         self.queue = queue
         self.dragonKillList = []
@@ -106,6 +136,18 @@ class MatchList():
         return MatchList(newMatches)
     def size(self):
         return len(self.matches)
+    
+    def matchIdList(self):
+        '''
+        Returns a list of the match ids in the listed matches.
+        
+        @rtype list of numbers
+        @return list of match ids
+        '''
+        matchids = []
+        for match in self.matches:
+            matchids.append(match.matchDto['gameId'])
+        return matchids
     '''
     Returns a DragonStats obj. DragonStats has:
     how much you kill each dragon
@@ -330,7 +372,6 @@ class MatchList():
         kills = []
         for match in self.matches:
             killList = match.kills()
-            print(str(killList))
             i= 0
             while i < len(killList):
                 #returned by Match x and y are:
@@ -347,7 +388,6 @@ class MatchList():
                 i+=1
             kills.extend(killList)
             
-        print(str(kills))
         return kills
     
     

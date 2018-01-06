@@ -6,7 +6,7 @@ Created on Nov 23, 2017
 
 from search.GameInfoGetters.GameInfoGetter import GameInfoGetter
 from search.GameInfoGetters.APIInfoGetter import APIInfoGetter
-from search.models import Match
+from search.models import Match, MatchTimeline
 from json import dumps, loads
 
 class DBAPIInfoGetter(GameInfoGetter):
@@ -21,7 +21,7 @@ class DBAPIInfoGetter(GameInfoGetter):
         try:
             match = Match.objects.get(gameId=id)
             match = loads(match.jsonString)
-            print('GET match ' + str(id) + ' from db successful')
+            print('GET match ' + str(id) + ' from db')
         except Match.DoesNotExist:
             match = self.gameinfo.getMatchById(id)
             matchModel = Match.objects.create(gameId = match['gameId'], jsonString=dumps(match))
@@ -31,4 +31,13 @@ class DBAPIInfoGetter(GameInfoGetter):
         return match
     #TODO: make timelines saved in database.
     def getMatchTimelineById(self,id):
-        return self.gameinfo.getMatchTimelineById(id)
+        try:
+            timeline = MatchTimeline.objects.get(gameId=id)
+            timeline = loads(timeline.jsonString)
+            print('GET match timeline ' + str(id) + 'from db')
+        except MatchTimeline.DoesNotExist:
+            timeline = self.gameinfo.getMatchTimelineById(id)
+            matchTimeline = MatchTimeline.objects.create(gameId= id, jsonString = dumps(timeline))
+            matchTimeline.save()
+            print('adding match timeline ' + str(id) + 'to db')
+        return timeline

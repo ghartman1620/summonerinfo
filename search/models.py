@@ -4,7 +4,10 @@ from django.db import models
 class Match(models.Model):
     gameId = models.BigIntegerField(primary_key=True)
     jsonString = models.TextField()
-    
+
+class MatchTimeline(models.Model):
+    gameId = models.BigIntegerField(primary_key=True)
+    jsonString = models.TextField()
 
 
 ''''I started trying to translate the riot games match data into

@@ -38,6 +38,9 @@ Towers
 <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#kills" aria-expanded="true" aria-controls="kills" onclick="setupHeatmap()">
 Kills
 </button>
+<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#matchHistory" aria-expanded="true" aria-controls="matchHistory">
+Match History
+</button>
 
 <div class="collapse" id="winrates" style="">
 <h3> Winrate Statistics </h3>
@@ -275,53 +278,119 @@ Dragon time info:
 </div>
 
 <div class="collapse" id="kills" style="position:relative;">
-<div id="displayTime">25:00-26:00 </div>
-<input type="range" min="1" max="50" value="25" class="slider" id="killTime">
+<input type="checkbox" id="killCheck">
+<label for="killCheck">Display based on a range of time/display all kills&assists</label><br>
+<div id="killsTimeDisplay">
+<div id="displayTimeBegin" style="display:inline;">25:00</div><div id="dash" style="display:inline;">-</div><div id="displayTimeEnd" style="display:inline;">26:00</div>
+<p id="timeRangeTxt">Time range:</p>
+<p id="timeRangeBegin">Begin at </p>
+<input type="range" min="1" max="50" value="26" class="slider" id="killTimeBegin">
+<p id="timeRangeBegin">End at at </p>
+<input type="range" min="1" max="50" value="27" class="slider" id="killTimeEnd">
+</div>
+<p>Value</p>
+<input type="range" min="1" max="100" value="25" class="slider" id="heatmapValue">
 <img src="/static/minimap.png" style="position:absolute;x:0;y:0;"></img>
-<div id="heatMap" style="height: 742px;z-axis=1;">
+<div id="heatMap" style="height: 510px;z-axis=1;">
 
 
 </div>
 </div>
+
+<div class="collapse" id="matchHistory" style="">
+{% for id in matchIds %}
+
+<a href="https://matchhistory.na.leagueoflegends.com/en/#match-details/NA1/{{id}}/{{summonerId}}">Match {{forloop.counter}}</a><br>
+{% endfor %}
+</div> 
 
 
 <script src="{% static 'search/heatmap.min.js' %}"></script>
 
 <script>
 	var kills = [];
-	{% for kill in championKills %}
-		kills.push({x: {{kill.x}}, y: {{kill.y}}, timestamp: {{kill.timestamp}}, isKill: "{{kill.isKill}}" }); 
-	{% endfor %}
-	var slider = document.getElementById("killTime");
-	var killTime = document.getElementById("displayTime");
-	slider.oninput = killTimeSlide;
+	{% for kill in championKills %}kills.push({x: {{kill.x}}, y: {{kill.y}}, timestamp: {{kill.timestamp}}, isKill: "{{kill.isKill}}" }); {% endfor %}
+	const MAX_TIME = 120;
+	var sliderBegin = document.getElementById("killTimeBegin");
+	var timeDisplayBegin = document.getElementById("displayTimeBegin");
+	var sliderEnd = document.getElementById("killTimeEnd");
+	var timeDisplayEnd = document.getElementById("displayTimeEnd");
 	
-	function killTimeSlide(){
-		killTime.innerHTML = (slider.value-1) + ':00-' + slider.value+':00';
-		setupHeatmapHelper(slider.value-1);
+	var thickness = document.getElementById("heatmapValue");
+	var displayByTime = true;
+	sliderBegin.oninput = killTimeSlideBegin;
+	sliderEnd.oninput = killTimeSlideEnd
+	thickness.oninput = heatmapValueSlide;
+		$('#killCheck').click(function(){
+		if ($(this).is(':checked')) {
+			//hide slider, and make heatmap ignore time
+			displayByTime = false;
+			document.getElementById('killsTimeDisplay').style.visibility = "hidden";
+			setupHeatmapHelper(0, MAX_TIME, thickness.value);
+		}
+		else {
+			//show slider, make heatmap look at time
+			displayByTime = true;
+			document.getElementById('killsTimeDisplay').style.visibility = "visible";
+			//setTimeout(doNothing(), 1000);
+
+			setupHeatmapHelper(sliderBegin.value-1, sliderEnd.value-1, thickness.value);
+		}
+	});
+	function doNothing(){}
+	
+	function heatmapValueSlide(){
+		if(!displayByTime){
+			setupHeatmapHelper(0, MAX_TIME, thickness.value);
+		}
+		else{
+			setupHeatmapHelper(sliderBegin.value-1, sliderEnd.value-1, thickness.value);
+		}
 	}
+	function killTimeSlideBegin(){
+		if (sliderBegin.value > sliderEnd.value-1){
+			sliderBegin.value = sliderEnd.value-1;
+		}
+		else{
+			displayTimeBegin.innerHTML = (sliderBegin.value-1) + ':00';
+			setupHeatmapHelper(sliderBegin.value-1, sliderEnd.value-1, thickness.value);
+		}
+	}
+	function killTimeSlideEnd(){
+		if (sliderEnd.value < parseInt(sliderBegin.value)+1){
+
+			var newEndValue = parseInt(sliderBegin.value) + 1;
+			sliderEnd.value = newEndValue;
+		}
+		else{
+			displayTimeEnd.innerHTML = (sliderEnd.value-1) + ':00';
+			setupHeatmapHelper(sliderBegin.value-1, sliderEnd.value-1, thickness.value);
+		}
+	}
+	
 	function setupHeatmap(){
-		window.setTimeout(function() { setupHeatmapHelper(25); }, 750);
+		window.setTimeout(function() { setupHeatmapHelper(25, 26, 25); }, 750);
 	}
-	function setupHeatmapHelper(time) {
+	function setupHeatmapHelper(begin, end, value) {
 		if (typeof setupHeatmapHelper.hm == 'undefined'){
   			setupHeatmapHelper.hm = h337.create({
 	    		container: document.getElementById('heatMap')
 			});
 		}
 		var points = [];
+
 		for(i = 0; i < kills.length; i++){
-			//if(kills[i].timestamp/60000 /* minutes */ > time && kills[i].timestamp/60000 < time+1){
+			if(!displayByTime || kills[i].timestamp/60000 /* minutes */ > begin && kills[i].timestamp/60000 < end){
 				points.push({
 					x: kills[i].x,
 					y: kills[i].y,
-					value: 25
+					value: value
 				});  
-			//}
+			}
 		}
   		var testData = {
         	min: 0,
-        	max: 200,
+        	max: 100,
         	data: points
   		};
 	  	setupHeatmapHelper.hm.setData(testData);

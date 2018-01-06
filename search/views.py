@@ -6,6 +6,8 @@ from search.WinrateTypes.Winrate import Winrate
 from search.Match.MatchList import MatchList
 from search.GameConstants import QueueType
 
+from django.http import HttpResponse
+
 
 ''''
 def win(name, match):
@@ -178,12 +180,30 @@ def search(request, name):
         'vsPlayersTeam'  : vsPlayersTeamList,
     })
     '''
-    matchList = MatchList(getInfoGetter(), name, maxMatches=int(request.session['numMatches']))
+    maxMatches = int(request.session['numMatches'])
+    champions = request.session['champions']
+    role = request.session['role']
+    queue = request.session['queue']
+    if champions == "":
+        champions = None
+    if role == "":
+        role = None
+    if queue== "":
+        queue = None
+    try:
+        matchList = MatchList(getInfoGetter(), name, maxMatches, None, queue, champions, role)
+    except RuntimeError as e:
+        return HttpResponse("Invalid input: " + str(e))
     #remember that you wrote the text 'in PST only' into search.html
-    assert len(matchList.pctElementalKilledByOrder()) < 6
+    if matchList.size() == 0:
+        return HttpResponse('no matches found with those parameters. Try a different search or include more matches.')
     return render(request, 'search/search.html', {
         'name'             : name,
         'overview'         : str(matchList),
+        'numMatches'       : maxMatches,
+        'matchIds'         : matchList.matchIdList(),
+        'summonerId'       : matchList.id,
+        
         #By time
         'winratesByTime'   : wrListToStringList(matchList.winrateByTime()),
         
@@ -222,4 +242,7 @@ def search(request, name):
 
 def searchtarget(request):
     request.session['numMatches'] = request.POST['matches']
+    request.session['champions'] = request.POST['champions']
+    request.session['role'] = request.POST['role']
+    request.session['queue'] = request.POST['queue']
     return redirect('search:search',request.POST['summonerName'])

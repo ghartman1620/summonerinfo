@@ -35,7 +35,6 @@ class MatchTest(TestCase):
     def testExtendWrList(self):
         allyWrDict = dict()
         enemyWrDict = dict()
-        print(self.match2.matchDto['gameId'])
         self.match2.extendWrBySummonerDicts(allyWrDict, enemyWrDict)
         self.assertEqual(allyWrDict['psrn'].played, 1)
         self.assertEqual(allyWrDict['psrn'].won, 0)

@@ -26,9 +26,9 @@ class MockInfoGetter(GameInfoGetter):
         f = verifyOpen('search/mockSummoner')
         return loads(f.read())
 
-    def getMatchlistBySummonerId(self, id, beginIndex, endIndex = None):
-        if id != 50164289:
-            raise RuntimeError(' no mock matchlist data for account id ' + str(id))
+    def getMatchlistBySummonerId(self, sId, beginIndex, endIndex = None):
+        if sId != 50164289:
+            raise RuntimeError(' no mock matchlist data for account id ' + str(sId))
         f = verifyOpen('search/mockMatchlist')
         obj = loads(f.read())
         

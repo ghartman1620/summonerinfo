@@ -1,7 +1,30 @@
 <form action="{% url 'search:searchtarget'%}" method="post">
     {% csrf_token %}
-    <input type="text" placeholder="Search for a summoner" name="summonerName"/>
-    <input type="number" placeholder="How many matches?" name="matches"/>
+    <input type="text" placeholder="Search for a summoner" name="summonerName"/ required>
+    <input type="number" placeholder="How many matches?" name="matches"/ required>
+    <input type="text" placeholder="Champions" name="champions" id="champions"/>
+    <label for="champions">Remove non alphabetical characters from the champion's name. DrMundo, velkoz, vi, etc. Separate multiple champions by a comma.</label>
+    <br>
+    
+    <p>
+    <select name="queue">
+      <option value="">Any Queue</option>
+      <option value="BLIND">Normal Blind</option>
+	  <option value="DRAFT">Normal Draft</option>
+	  <option value="SOLODUO">Ranked Solo/Duo</option>
+	  <option value="FLEX">Ranked Flex</option>
+	</select>
+	<select name="role">
+      <option value="">Any Role</option>
+	  <option value="TOP">Top</option>
+	  <option value="JUNGLE">Jungle</option>
+	  <option value="MID">Mid</option>
+	  <option value="BOT">Bottom</option>
+	  <option value="SUPPORT">Support</option
+	</select>
+	
+	
+	</p>
     <input type="submit" value="Search"/>
     
 </form>
