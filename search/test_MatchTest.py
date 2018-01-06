@@ -41,9 +41,9 @@ class MatchTest(TestCase):
         self.assertEqual(allyWrDict['lilmontaro'].played, 1)
         self.assertEqual(allyWrDict['lilmontaro'].won, 0)
         self.assertEqual(enemyWrDict['itou makoto'].played, 1)
-        self.assertEqual(enemyWrDict['itou makoto'].won, 1)
+        self.assertEqual(enemyWrDict['itou makoto'].won, 0)
         self.assertEqual(enemyWrDict['muterevised'].played, 1)
-        self.assertEqual(enemyWrDict['muterevised'].won, 1)
+        self.assertEqual(enemyWrDict['muterevised'].won, 0)
         
         self.match3.extendWrBySummonerDicts(allyWrDict, enemyWrDict)
         self.assertEqual(allyWrDict['lilmontaro'].played, 2)

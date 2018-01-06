@@ -19,7 +19,9 @@ def getMatchesFromMatchlist(matchlist, gameinfo, season, queue, summonerName, ch
                     isValid = match['queue'] == QueueType.NORMAL_BLIND_SR.value or \
                               match['queue'] == QueueType.NORMAL_DRAFT_SR.value or \
                               match['queue'] == QueueType.RANKED_SOLODUO.value or \
-                              match['queue'] == QueueType.RANKED_FLEX_SR.value
+                              match['queue'] == QueueType.RANKED_FLEX_SR.value or \
+                              match['queue'] == QueueType.RANKED_DYNAMIC.value
+                      
                 else:
                     isValid = match['queue'] == queue.value
             if isValid:
@@ -84,7 +86,7 @@ class MatchList():
     
     
     def __str__(self):
-        return str(len(self.matches)) + ' matches analyzed. ' +(('queue: ' + str(self.queue)) if self.queue != None else '') + \
+        return str(len(self.matches)) + ' matches analyzed of ' +(('queue: ' + str(self.queue)) if self.queue != None else 'all standard SR modes') + \
             (('season: ' + str(self.season)) if self.season != None else '')
     '''
     Create a new MatchList querying the given gameinfo for games that match the parameter criteria.
@@ -784,6 +786,7 @@ class MatchList():
     12-18
     18-24
     '''
+    #refactor me!
     def winrateByTime(self):
         winrates = [WinrateByTimeOfDay(0,0,0,6), WinrateByTimeOfDay(0,0,6,12), WinrateByTimeOfDay(0,0,12,18), WinrateByTimeOfDay(0,0,18,24)]
         for match in self.matches:
@@ -796,12 +799,15 @@ class MatchList():
                 winrates[ind].played+=1
             else:
                 winrates[ind].played+=1
+        for wr in winrates:
+            wr.pct = float('nan') if wr.played == 0 else int(wr.won/wr.played *10000 )/100
         return winrates
     '''
     returns a pair of lists, the first describing the winrates of this summoner
     that appear on this summoner's team more than once and the second describing
     the winrates of this summoner against any summoner that appears on the enemy team more than once.
     '''
+    #refactor me!
     def winrateByOtherSummoners(self):
         allyTeamWrDict = dict()
         enemyTeamWrDict = dict()
@@ -815,7 +821,8 @@ class MatchList():
         for v in enemyTeamWrDict.values():
             if v.played > 1:
                 winrates.append(v)
-            
+        for wr in winrates:
+            wr.pct = float('nan') if wr.played == 0 else int(wr.won/wr.played *10000 )/100
         return winrates
     
     def avgBarons(self):

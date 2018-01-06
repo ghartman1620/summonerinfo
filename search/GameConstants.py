@@ -22,7 +22,8 @@ class QueueType(Enum):
             return QueueType.RANKED_SOLODUO
         elif q=="FLEX":
             return QueueType.RANKED_FLEX_SR
-
+        elif q=="DYNAMIC":
+            return QueueType.RANKED_DYNAMIC
 class SeasonId(Enum):
     PRESEASON_3 = 0
     SEASON_3 = 1

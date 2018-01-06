@@ -1,0 +1,76 @@
+
+
+.formContainer {
+  position:relative;
+  top: 200px;
+  width: 90%;
+  margin:auto;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+}
+.textInput {
+  background-color: #FFFAFB;
+  border: none;
+}
+.inputFormLine {
+  width: 100%;
+  margin:0 auto;
+}
+#summonerNameInput {
+  margin:auto;
+  width:59%;
+}
+#matchNumInput {
+  margin:auto;
+  width:20%;
+}
+#submit {
+  margin:auto;
+  width:20%;
+}
+#moreOptions {
+  width: 100%;
+}
+#moreOptionsBtn {
+  background-color: lightgray;
+  margin: 0 auto;
+  width: 800px;
+  border: none;
+}
+
+ 
+#submit {
+  background-color: lightgray;
+}
+#champions {
+  display:inline;
+}
+#tooltip {
+
+  display:inline;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+#tooltiptext {
+    visibility: hidden;
+    width: 400px;
+    top: 100%;
+    left: 50%; 
+    margin-left: -200px; /* Use half of the width (120/2 = 60), to center the tooltip */
+    background-color: lightgray;
+    color: black;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+ 
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+#tooltip:hover #tooltiptext {
+    visibility: visible;
+}

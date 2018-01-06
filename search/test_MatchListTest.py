@@ -52,12 +52,12 @@ class MatchListCtorTest (TestCase):
                             + ' probable cause season comes earlier in time than the latest match searched for by this number of maxMatches')    
         
     def testCtorFiltersByQueue(self):
-        self.matchlist = MatchList(self.gameinfo, 'l am eternal', queue=QueueType.RANKED_SOLODUO)
+        self.matchlist = MatchList(self.gameinfo, 'l am eternal', maxMatches=10,queue="SOLODUO")
         for match in self.matchlist.matches:
             self.assertEquals(QueueType.RANKED_SOLODUO.value, match.matchDto['queueId'])
         
     def testCtorFiltersByQueueAndSeason(self):
-        self.matchlist = MatchList(self.gameinfo, 'l am eternal', 100, SeasonId.SEASON_2016, QueueType.RANKED_DYNAMIC)
+        self.matchlist = MatchList(self.gameinfo, 'l am eternal', 100, SeasonId.SEASON_2016, "DYNAMIC")
         self.assertTrue(len(self.matchlist.matches) > 0, 'bad test; got no games. Try increasing maxMatches to search for,'
                             + ' probable cause season comes earlier in time than the latest match searched for by this number of maxMatches')    
         for match in self.matchlist.matches:  
@@ -66,7 +66,7 @@ class MatchListCtorTest (TestCase):
 class MatchListTest (TestCase):
     def setUp(self):
         gameinfo = getInfoGetter(True)
-        self.matchlist = MatchList(gameinfo, 'l am eternal', queue=QueueType.RANKED_SOLODUO)
+        self.matchlist = MatchList(gameinfo, 'l am eternal', queue="SOLODUO")
     def tearDown(self):
         self.matchlist = None
     

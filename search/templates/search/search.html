@@ -1,61 +1,101 @@
-{% load static %}
+<head>{% load static %}
 {% load towertag %}
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" href={% static 'search/search.css' %} type = "text/css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-
-<p> search for another summoner:</p>
-<form action="{% url 'search:searchtarget'%}" method="post">
-    {% csrf_token %}
-    <input type="text" placeholder="Search for a summoner" name="summonerName"/>
-    <input type="submit" value="Search"/>
-</form>
-
-
-{% if name %} <div class="text"><p>{{name}}</p></div>
-{% else %} <p>no name</p>
-{% endif %}
-
+<title> {{name}} </title>
+</head>
+<body>
+<h2 style="text-align: center">{{name}}</h2>
 {% if overview %}
-<p>{{overview}}</p>
+<p style="text-align: center">{{overview}}</p>
+<p style="font-size:8pt; text-align:center">Click once to open a panel. Click again to collapse.</p>
 {% endif %}
-<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#winrates" aria-expanded="true" aria-controls="winrates">
-Winrate Statistics
-</button>
-
-<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#dragonInfo" aria-expanded="true" aria-controls="dragonInfo">
-Dragons
-</button>
-
-<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#baronInfo" aria-expanded="true" aria-controls="baronInfo">
-Baron Info
-</button>
-<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#towers" aria-expanded="true" aria-controls="towers">
-Towers
-</button>
-<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#kills" aria-expanded="true" aria-controls="kills" onclick="setupHeatmap()">
-Kills
-</button>
-<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#matchHistory" aria-expanded="true" aria-controls="matchHistory">
+<button class="infoChoiceBtn" type="button" data-toggle="collapse" data-target="#matchHistory" aria-expanded="true" aria-controls="matchHistory">
 Match History
 </button>
 
+<button class="infoChoiceBtn" type="button" data-toggle="collapse" data-target="#kills" aria-expanded="true" aria-controls="kills" onclick="setupHeatmap()">
+Kills
+</button>
+<button class="infoChoiceBtn" type="button" data-toggle="collapse" data-target="#towers" aria-expanded="true" aria-controls="towers">
+Towers
+</button>
+
+<button class="infoChoiceBtn" type="button" data-toggle="collapse" data-target="#dragonInfo" aria-expanded="true" aria-controls="dragonInfo">
+Dragons
+</button>
+<button class="infoChoiceBtn" type="button" data-toggle="collapse" data-target="#baronInfo" aria-expanded="true" aria-controls="baronInfo">
+Baron Info
+</button>
+<button class="infoChoiceBtn" type="button" data-toggle="collapse" data-target="#winrates" aria-expanded="true" aria-controls="winrates">
+Winrate Statistics
+</button>
+
+
+
+
+
+
+
 <div class="collapse" id="winrates" style="">
 <h3> Winrate Statistics </h3>
-{% if winratesByTime %}
-{% for wr in winratesByTime %}
-<p>{{wr}}</p>
+{% if wrByTime %}
+<h4>Winrate by time of day of game (in PST)</h4> 
+<table style="width:80%; text-align: center;">
+<tr>
+	<th> Time </th>
+	<th> Number of Games Played </th>
+	<th> Winrate </th>
+</tr>
+{% for wr in wrByTime %}
+<tr>
+	<td> {{wr.beginTime}}:00-{{wr.endTime}}:00 </td>
+	<td> {{wr.played}} </td>
+	<td> {{wr.pct}} </td>
+</tr>
 {% endfor %}
+
+</table>
+
 {% endif %}
 
-
 {% if otherSummonersWr %}
-<p> Players with whom you've played more than two games (Games you won, games played)</p>
+<h4>Winrate with other summoners on your team </h4>
+<table style="width:80%; text-align: center;">
+<tr>
+	<th>Summoner</th>
+	<th>Games Played</th>
+	<th>Winrate</th>
+</tr>
 {% for wr in otherSummonersWr %}
-<p> {{wr}}</p>
+{% if wr.onThisSummonersTeam %}
+<tr>
+	<td>{{wr.thatSummoner}}</td>
+	<td>{{wr.played}}</td>
+	<td>{{wr.pct}}</td>
+</tr>
+{% endif %}
 {% endfor %}
+</table>
+<h4>Winrate against other summoners </h4>
+<table style="width:80%; text-align: center;">
+<tr>
+	<th>Summoner</th>
+	<th>Games Played</th>
+	<th>Winrate</th>
+</tr>
+{% for wr in otherSummonersWr %}
+{% if not wr.onThisSummonersTeam %}
+<tr>
+	<td>{{wr.thatSummoner}}</td>
+	<td>{{wr.played}}</td>
+	<td>{{wr.pct}}</td>
+</tr>
+{% endif %}
+{% endfor %}
+</table>
 {% endif %}
 </div>
 
@@ -68,32 +108,55 @@ Match History
 <p>Percent of total elemental drakes you kill: {{pctElementals}}</p>
 <p>Percent of total elder drakes you kill: {{pctElders}}</p>
 
-{% if pctOfEachType %}
-<p> Of the drakes you kill, you get the following:</p>
-{% for d in pctOfEachType %}
-	<p>{{d}}</p>
-{% endfor %}
-{% endif %}
+<div id="yourDragonsPie"></div>
+
 
 {% if pctOfTotalByType %}
-<p> of the total drakes of each type in your game, you kill the following of each:</p>
-{% for d in pctOfTotalByType %}
-	<p>{{d}}</p>
+<h4> of the total drakes of each type in your game, you kill the following of each:</h4>
+<table>
+<tr>
+	<th>Dragon</th>
+	<th>% you kill</th>
+</tr>
+{% for d in pctOfTotalByType.items %}
+<tr>	
+	<td>{{d.0}}</td>
+	<td>{{d.1}}</td>
+</tr>
 {% endfor %}
+</table>
 {% endif %}
 {% if pctEleByOrder %}
+
 <p> You kill the following percentage of the elemental dragons by order in your games: </p>
+<table>
+<tr>
+	<th>Elemental drake</th>
+	<th>%</th>
+</tr>
 {% for d in pctEleByOrder %}
-	<p>{{forloop.counter}}:{{d}}</p>
+<tr>
+	<td> {% orderWord forloop.counter %} </td>
+	<td> {{d}} </td>
+</tr>
 {% endfor %}
+</table>
 {% endif %}
 
 {% if pctElderByOrder %}
 <p> You kill the following percentage of the elder dragons by order in your games: </p>
+<table>
+<tr>
+	<th>Elder drake</th>
+	<th>%</th>
+</tr>
 {% for d in pctElderByOrder %}
-<p>{{forloop.counter}}: {{d}} </p>
+<tr>
+	<td> {% orderWord forloop.counter %} </td>
+	<td> {{d}} </td>
+</tr>
 {% endfor %}
-
+</table>
 {% endif %}
 
 {% comment %}
@@ -105,6 +168,7 @@ Dragon time info:
 'contDragInfo'     : matchList.timePercentContestedElementalDragons(),
 'b2BDragInfo'      : matchList.timePercentBackToBackElementalDragons(),
 {% endcomment %}
+
 <p> When you get the first dragon, you get it on average at {{firstDragTime}}</p>
 <p> After the enemy takes an elemental drake, you take the next elemental drake {{contDragInfo.1}}% of the time in an average of {{contDragInfo.0}}</p>
 <p> After the enemy takes an elemental drake, you lose the next elemental drake {{enemyB2BDragInfo.1}}% of the time in an average of {{enemyB2BDragInfo.0}}</p>
@@ -119,11 +183,12 @@ Dragon time info:
 </div>
 
 <div class="collapse" id="towers" style="">
-	<h3> Towers </h3>
+	<h3> Towers (wins left, losses right) </h3> <p> hover towers </p>
 
 	<div class="towerdisplay" style="position:relative;">
-		<img id="winmap" src="/static/minimap.png" title="My cat sat on a table">
-        <img id="lossmap" src="/static/minimap.png" title="My cat sat on a table">
+
+		<img id="winmap" src="{% static 'minimap.png' %}" title="My cat sat on a table">
+        <img id="lossmap" src="{% static 'minimap.png' %}" title="My cat sat on a table">
         <!-- Win game, get turrets !-->
 		<div id="to-kill-win"><img src="/static/{% enemyTowerIcon winTowersKilled "OUTER_TURRET" "TOP_LANE" %}.png"></div>
 		<div id="ti-kill-win"><img src="/static/{% enemyTowerIcon winTowersKilled "INNER_TURRET" "TOP_LANE" %}.png"></div>
@@ -258,7 +323,7 @@ Dragon time info:
 	</div>
 	
 	
-	
+	{% comment %}
 	<p> In wins: </p>
 	{% for pair in winTowersKilled.items %}
 		<p> You kill {{pair.0}} in {{pair.1.0}}% of your wins on average at {{pair.1.1}}</p>
@@ -274,7 +339,7 @@ Dragon time info:
 	{% for pair in lossTowersLost.items %}
 		<p> You lose {{pair.0}} in {{pair.1.0}}% of your losses on average at {{pair.1.1}}</p>
 	{% endfor %}
-	
+	{% endcomment %}
 </div>
 
 <div class="collapse" id="kills" style="position:relative;">
@@ -290,7 +355,7 @@ Dragon time info:
 </div>
 <p>Value</p>
 <input type="range" min="1" max="100" value="25" class="slider" id="heatmapValue">
-<img src="/static/minimap.png" style="position:absolute;x:0;y:0;"></img>
+<img src="{% static 'minimap.png' %}" style="position:absolute;x:0;y:0;"></img>
 <div id="heatMap" style="height: 510px;z-axis=1;">
 
 
@@ -306,8 +371,10 @@ Dragon time info:
 
 
 <script src="{% static 'search/heatmap.min.js' %}"></script>
-
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
+	google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
 	var kills = [];
 	{% for kill in championKills %}kills.push({x: {{kill.x}}, y: {{kill.y}}, timestamp: {{kill.timestamp}}, isKill: "{{kill.isKill}}" }); {% endfor %}
 	const MAX_TIME = 120;
@@ -395,7 +462,29 @@ Dragon time info:
   		};
 	  	setupHeatmapHelper.hm.setData(testData);
 	}
+	function drawChart() {
+		var data = google.visualization.arrayToDataTable([
+          ['Dragon Type',    'Percentage of total dragons killed'],
+          {% for d in pctOfEachType.items %}
+          ['{{d.0}}', {{d.1}}], 
+          {% endfor %}
+        ]);
+        var options = {
+			title: 'Your Dragon Kills',
+			width: 500,
+			height: 400,
+			pieSliceTextStyle: {
+				color: 'transparent',
+			},
+			colors: ['#8B0000', '#00008B', '#8B4513', '#C0C0C0', '#4B0082'],  
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('yourDragonsPie'));
+
+        chart.draw(data, options);
+	}
+
 
 </script>
+</body>
 
 

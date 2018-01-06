@@ -34,4 +34,22 @@ def allyTowerIcon(towerDict, towerType, towerLane):
         return 'allyturret4'
     return 'allyturret' + str(1+floor((towerDict[(towerType, towerLane)][0])/25))
 
+@register.simple_tag()
+def orderWord(num):
+    if num==1:
+        return 'first'
+    if num==2:
+        return 'second'
+    if num==3:
+        return 'third'
+    if num==4:
+        return 'fourth'
+    if num==5:
+        return 'fifth'
+    if num==6:
+        return 'sixth'
+    if num==7:
+        return 'seventh'
+
+
                     

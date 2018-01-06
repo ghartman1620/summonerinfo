@@ -25,7 +25,7 @@ SECRET_KEY = 'esmx26uuo7&d-8q@a+6t2r774+h=w&0k+3&kiu!pgy5-m!&)bh'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1']
 
 SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 

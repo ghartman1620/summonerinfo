@@ -130,10 +130,12 @@ class Match():
         return False #else player is on second team and first team won
 
     def extendWrBySummonerDicts(self, allyWrDict, enemyWrDict):
+        
         team = self.thisSummonersTeamId()
         win = self.isWin()
 
         for participant in self.matchDto['participantIdentities']:
+
             if (participant['participantId'] in range(1,6) and team == BLUE_TEAM)\
                or (participant['participantId'] in range(6, 11) and team == RED_TEAM):
                     
@@ -145,8 +147,7 @@ class Match():
             else:
                 if participant['player']['summonerName'].lower() in enemyWrDict.keys():
                     enemyWrDict[participant['player']['summonerName'].lower()].played+=1
-                    enemyWrDict[participant['player']['summonerName'].lower()].won+= int(not win)
+                    enemyWrDict[participant['player']['summonerName'].lower()].won+= int(win)
                 else:
-                    enemyWrDict[participant['player']['summonerName'].lower()] = WinrateByOtherSummoner(1, int(not win), participant['player']['summonerName'].lower(), False)
-            
+                    enemyWrDict[participant['player']['summonerName'].lower()] = WinrateByOtherSummoner(1, int(win), participant['player']['summonerName'].lower(), False)
         

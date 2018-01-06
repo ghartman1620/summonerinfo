@@ -193,10 +193,11 @@ def search(request, name):
     try:
         matchList = MatchList(getInfoGetter(), name, maxMatches, None, queue, champions, role)
     except RuntimeError as e:
-        return HttpResponse("Invalid input: " + str(e))
+        return HttpResponse("Error: " + str(e))
     #remember that you wrote the text 'in PST only' into search.html
     if matchList.size() == 0:
         return HttpResponse('no matches found with those parameters. Try a different search or include more matches.')
+
     return render(request, 'search/search.html', {
         'name'             : name,
         'overview'         : str(matchList),
@@ -205,17 +206,16 @@ def search(request, name):
         'summonerId'       : matchList.id,
         
         #By time
-        'winratesByTime'   : wrListToStringList(matchList.winrateByTime()),
+        'wrByTime'         : matchList.winrateByTime(),
         
         #OtherSummoners:
-        'otherSummonersWr' : wrListToStringList(matchList.winrateByOtherSummoners()),
+        'otherSummonersWr' : matchList.winrateByOtherSummoners(),
         
         #Dragons:
-        #(dicts turned into lists for easier html display)
         'pctElementals'    : matchList.pctAllElemental(),
         'pctElders'        : matchList.pctAllElders(),
-        'pctOfEachType'    : matchList.pctDragonsKilledByType().items(),
-        'pctOfTotalByType' : matchList.pctEachDragonType().items(),
+        'pctOfEachType'    : matchList.pctDragonsKilledByType(),
+        'pctOfTotalByType' : matchList.pctEachDragonType(),
         'pctEleByOrder'    : matchList.pctElementalKilledByOrder(),
         'pctElderByOrder'  : matchList.pctElderKilledByOrder(),
         
